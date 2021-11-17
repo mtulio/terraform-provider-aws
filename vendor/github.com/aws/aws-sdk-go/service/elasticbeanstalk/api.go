@@ -7564,7 +7564,7 @@ type DescribeEnvironmentManagedActionHistoryInput struct {
 	EnvironmentName *string `min:"4" type:"string"`
 
 	// The maximum number of items to return for a single request.
-	MaxItems *int64 `type:"integer"`
+	MaxItems *int64 `min:"1" type:"integer"`
 
 	// The pagination token returned by a previous request.
 	NextToken *string `type:"string"`
@@ -7585,6 +7585,9 @@ func (s *DescribeEnvironmentManagedActionHistoryInput) Validate() error {
 	invalidParams := request.ErrInvalidParams{Context: "DescribeEnvironmentManagedActionHistoryInput"}
 	if s.EnvironmentName != nil && len(*s.EnvironmentName) < 4 {
 		invalidParams.Add(request.NewErrParamMinLen("EnvironmentName", 4))
+	}
+	if s.MaxItems != nil && *s.MaxItems < 1 {
+		invalidParams.Add(request.NewErrParamMinValue("MaxItems", 1))
 	}
 
 	if invalidParams.Len() > 0 {
@@ -12505,6 +12508,15 @@ const (
 	ActionHistoryStatusUnknown = "Unknown"
 )
 
+// ActionHistoryStatus_Values returns all elements of the ActionHistoryStatus enum
+func ActionHistoryStatus_Values() []string {
+	return []string{
+		ActionHistoryStatusCompleted,
+		ActionHistoryStatusFailed,
+		ActionHistoryStatusUnknown,
+	}
+}
+
 const (
 	// ActionStatusScheduled is a ActionStatus enum value
 	ActionStatusScheduled = "Scheduled"
@@ -12519,6 +12531,16 @@ const (
 	ActionStatusUnknown = "Unknown"
 )
 
+// ActionStatus_Values returns all elements of the ActionStatus enum
+func ActionStatus_Values() []string {
+	return []string{
+		ActionStatusScheduled,
+		ActionStatusPending,
+		ActionStatusRunning,
+		ActionStatusUnknown,
+	}
+}
+
 const (
 	// ActionTypeInstanceRefresh is a ActionType enum value
 	ActionTypeInstanceRefresh = "InstanceRefresh"
@@ -12529,6 +12551,15 @@ const (
 	// ActionTypeUnknown is a ActionType enum value
 	ActionTypeUnknown = "Unknown"
 )
+
+// ActionType_Values returns all elements of the ActionType enum
+func ActionType_Values() []string {
+	return []string{
+		ActionTypeInstanceRefresh,
+		ActionTypePlatformUpdate,
+		ActionTypeUnknown,
+	}
+}
 
 const (
 	// ApplicationVersionStatusProcessed is a ApplicationVersionStatus enum value
@@ -12547,6 +12578,17 @@ const (
 	ApplicationVersionStatusBuilding = "Building"
 )
 
+// ApplicationVersionStatus_Values returns all elements of the ApplicationVersionStatus enum
+func ApplicationVersionStatus_Values() []string {
+	return []string{
+		ApplicationVersionStatusProcessed,
+		ApplicationVersionStatusUnprocessed,
+		ApplicationVersionStatusFailed,
+		ApplicationVersionStatusProcessing,
+		ApplicationVersionStatusBuilding,
+	}
+}
+
 const (
 	// ComputeTypeBuildGeneral1Small is a ComputeType enum value
 	ComputeTypeBuildGeneral1Small = "BUILD_GENERAL1_SMALL"
@@ -12557,6 +12599,15 @@ const (
 	// ComputeTypeBuildGeneral1Large is a ComputeType enum value
 	ComputeTypeBuildGeneral1Large = "BUILD_GENERAL1_LARGE"
 )
+
+// ComputeType_Values returns all elements of the ComputeType enum
+func ComputeType_Values() []string {
+	return []string{
+		ComputeTypeBuildGeneral1Small,
+		ComputeTypeBuildGeneral1Medium,
+		ComputeTypeBuildGeneral1Large,
+	}
+}
 
 const (
 	// ConfigurationDeploymentStatusDeployed is a ConfigurationDeploymentStatus enum value
@@ -12569,6 +12620,15 @@ const (
 	ConfigurationDeploymentStatusFailed = "failed"
 )
 
+// ConfigurationDeploymentStatus_Values returns all elements of the ConfigurationDeploymentStatus enum
+func ConfigurationDeploymentStatus_Values() []string {
+	return []string{
+		ConfigurationDeploymentStatusDeployed,
+		ConfigurationDeploymentStatusPending,
+		ConfigurationDeploymentStatusFailed,
+	}
+}
+
 const (
 	// ConfigurationOptionValueTypeScalar is a ConfigurationOptionValueType enum value
 	ConfigurationOptionValueTypeScalar = "Scalar"
@@ -12576,6 +12636,14 @@ const (
 	// ConfigurationOptionValueTypeList is a ConfigurationOptionValueType enum value
 	ConfigurationOptionValueTypeList = "List"
 )
+
+// ConfigurationOptionValueType_Values returns all elements of the ConfigurationOptionValueType enum
+func ConfigurationOptionValueType_Values() []string {
+	return []string{
+		ConfigurationOptionValueTypeScalar,
+		ConfigurationOptionValueTypeList,
+	}
+}
 
 const (
 	// EnvironmentHealthGreen is a EnvironmentHealth enum value
@@ -12590,6 +12658,16 @@ const (
 	// EnvironmentHealthGrey is a EnvironmentHealth enum value
 	EnvironmentHealthGrey = "Grey"
 )
+
+// EnvironmentHealth_Values returns all elements of the EnvironmentHealth enum
+func EnvironmentHealth_Values() []string {
+	return []string{
+		EnvironmentHealthGreen,
+		EnvironmentHealthYellow,
+		EnvironmentHealthRed,
+		EnvironmentHealthGrey,
+	}
+}
 
 const (
 	// EnvironmentHealthAttributeStatus is a EnvironmentHealthAttribute enum value
@@ -12616,6 +12694,20 @@ const (
 	// EnvironmentHealthAttributeRefreshedAt is a EnvironmentHealthAttribute enum value
 	EnvironmentHealthAttributeRefreshedAt = "RefreshedAt"
 )
+
+// EnvironmentHealthAttribute_Values returns all elements of the EnvironmentHealthAttribute enum
+func EnvironmentHealthAttribute_Values() []string {
+	return []string{
+		EnvironmentHealthAttributeStatus,
+		EnvironmentHealthAttributeColor,
+		EnvironmentHealthAttributeCauses,
+		EnvironmentHealthAttributeApplicationMetrics,
+		EnvironmentHealthAttributeInstancesHealth,
+		EnvironmentHealthAttributeAll,
+		EnvironmentHealthAttributeHealthStatus,
+		EnvironmentHealthAttributeRefreshedAt,
+	}
+}
 
 const (
 	// EnvironmentHealthStatusNoData is a EnvironmentHealthStatus enum value
@@ -12646,6 +12738,21 @@ const (
 	EnvironmentHealthStatusSuspended = "Suspended"
 )
 
+// EnvironmentHealthStatus_Values returns all elements of the EnvironmentHealthStatus enum
+func EnvironmentHealthStatus_Values() []string {
+	return []string{
+		EnvironmentHealthStatusNoData,
+		EnvironmentHealthStatusUnknown,
+		EnvironmentHealthStatusPending,
+		EnvironmentHealthStatusOk,
+		EnvironmentHealthStatusInfo,
+		EnvironmentHealthStatusWarning,
+		EnvironmentHealthStatusDegraded,
+		EnvironmentHealthStatusSevere,
+		EnvironmentHealthStatusSuspended,
+	}
+}
+
 const (
 	// EnvironmentInfoTypeTail is a EnvironmentInfoType enum value
 	EnvironmentInfoTypeTail = "tail"
@@ -12654,12 +12761,29 @@ const (
 	EnvironmentInfoTypeBundle = "bundle"
 )
 
+// EnvironmentInfoType_Values returns all elements of the EnvironmentInfoType enum
+func EnvironmentInfoType_Values() []string {
+	return []string{
+		EnvironmentInfoTypeTail,
+		EnvironmentInfoTypeBundle,
+	}
+}
+
 const (
+	// EnvironmentStatusAborting is a EnvironmentStatus enum value
+	EnvironmentStatusAborting = "Aborting"
+
 	// EnvironmentStatusLaunching is a EnvironmentStatus enum value
 	EnvironmentStatusLaunching = "Launching"
 
 	// EnvironmentStatusUpdating is a EnvironmentStatus enum value
 	EnvironmentStatusUpdating = "Updating"
+
+	// EnvironmentStatusLinkingFrom is a EnvironmentStatus enum value
+	EnvironmentStatusLinkingFrom = "LinkingFrom"
+
+	// EnvironmentStatusLinkingTo is a EnvironmentStatus enum value
+	EnvironmentStatusLinkingTo = "LinkingTo"
 
 	// EnvironmentStatusReady is a EnvironmentStatus enum value
 	EnvironmentStatusReady = "Ready"
@@ -12670,6 +12794,20 @@ const (
 	// EnvironmentStatusTerminated is a EnvironmentStatus enum value
 	EnvironmentStatusTerminated = "Terminated"
 )
+
+// EnvironmentStatus_Values returns all elements of the EnvironmentStatus enum
+func EnvironmentStatus_Values() []string {
+	return []string{
+		EnvironmentStatusAborting,
+		EnvironmentStatusLaunching,
+		EnvironmentStatusUpdating,
+		EnvironmentStatusLinkingFrom,
+		EnvironmentStatusLinkingTo,
+		EnvironmentStatusReady,
+		EnvironmentStatusTerminating,
+		EnvironmentStatusTerminated,
+	}
+}
 
 const (
 	// EventSeverityTrace is a EventSeverity enum value
@@ -12690,6 +12828,18 @@ const (
 	// EventSeverityFatal is a EventSeverity enum value
 	EventSeverityFatal = "FATAL"
 )
+
+// EventSeverity_Values returns all elements of the EventSeverity enum
+func EventSeverity_Values() []string {
+	return []string{
+		EventSeverityTrace,
+		EventSeverityDebug,
+		EventSeverityInfo,
+		EventSeverityWarn,
+		EventSeverityError,
+		EventSeverityFatal,
+	}
+}
 
 const (
 	// FailureTypeUpdateCancelled is a FailureType enum value
@@ -12713,6 +12863,19 @@ const (
 	// FailureTypePermissionsError is a FailureType enum value
 	FailureTypePermissionsError = "PermissionsError"
 )
+
+// FailureType_Values returns all elements of the FailureType enum
+func FailureType_Values() []string {
+	return []string{
+		FailureTypeUpdateCancelled,
+		FailureTypeCancellationFailed,
+		FailureTypeRollbackFailed,
+		FailureTypeRollbackSuccessful,
+		FailureTypeInternalFailure,
+		FailureTypeInvalidEnvironmentState,
+		FailureTypePermissionsError,
+	}
+}
 
 const (
 	// InstancesHealthAttributeHealthStatus is a InstancesHealthAttribute enum value
@@ -12749,6 +12912,23 @@ const (
 	InstancesHealthAttributeAll = "All"
 )
 
+// InstancesHealthAttribute_Values returns all elements of the InstancesHealthAttribute enum
+func InstancesHealthAttribute_Values() []string {
+	return []string{
+		InstancesHealthAttributeHealthStatus,
+		InstancesHealthAttributeColor,
+		InstancesHealthAttributeCauses,
+		InstancesHealthAttributeApplicationMetrics,
+		InstancesHealthAttributeRefreshedAt,
+		InstancesHealthAttributeLaunchedAt,
+		InstancesHealthAttributeSystem,
+		InstancesHealthAttributeDeployment,
+		InstancesHealthAttributeAvailabilityZone,
+		InstancesHealthAttributeInstanceType,
+		InstancesHealthAttributeAll,
+	}
+}
+
 const (
 	// PlatformStatusCreating is a PlatformStatus enum value
 	PlatformStatusCreating = "Creating"
@@ -12766,6 +12946,17 @@ const (
 	PlatformStatusDeleted = "Deleted"
 )
 
+// PlatformStatus_Values returns all elements of the PlatformStatus enum
+func PlatformStatus_Values() []string {
+	return []string{
+		PlatformStatusCreating,
+		PlatformStatusFailed,
+		PlatformStatusReady,
+		PlatformStatusDeleting,
+		PlatformStatusDeleted,
+	}
+}
+
 const (
 	// SourceRepositoryCodeCommit is a SourceRepository enum value
 	SourceRepositoryCodeCommit = "CodeCommit"
@@ -12773,6 +12964,14 @@ const (
 	// SourceRepositoryS3 is a SourceRepository enum value
 	SourceRepositoryS3 = "S3"
 )
+
+// SourceRepository_Values returns all elements of the SourceRepository enum
+func SourceRepository_Values() []string {
+	return []string{
+		SourceRepositoryCodeCommit,
+		SourceRepositoryS3,
+	}
+}
 
 const (
 	// SourceTypeGit is a SourceType enum value
@@ -12782,6 +12981,14 @@ const (
 	SourceTypeZip = "Zip"
 )
 
+// SourceType_Values returns all elements of the SourceType enum
+func SourceType_Values() []string {
+	return []string{
+		SourceTypeGit,
+		SourceTypeZip,
+	}
+}
+
 const (
 	// ValidationSeverityError is a ValidationSeverity enum value
 	ValidationSeverityError = "error"
@@ -12789,3 +12996,11 @@ const (
 	// ValidationSeverityWarning is a ValidationSeverity enum value
 	ValidationSeverityWarning = "warning"
 )
+
+// ValidationSeverity_Values returns all elements of the ValidationSeverity enum
+func ValidationSeverity_Values() []string {
+	return []string{
+		ValidationSeverityError,
+		ValidationSeverityWarning,
+	}
+}

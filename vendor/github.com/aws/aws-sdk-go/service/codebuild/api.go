@@ -1043,11 +1043,8 @@ func (c *CodeBuild) DeleteReportGroupRequest(input *DeleteReportGroupInput) (req
 
 // DeleteReportGroup API operation for AWS CodeBuild.
 //
-// DeleteReportGroup: Deletes a report group. Before you delete a report group,
-// you must delete its reports. Use ListReportsForReportGroup (https://docs.aws.amazon.com/codebuild/latest/APIReference/API_ListReportsForReportGroup.html)
-// to get the reports in a report group. Use DeleteReport (https://docs.aws.amazon.com/codebuild/latest/APIReference/API_DeleteReport.html)
-// to delete the reports. If you call DeleteReportGroup for a report group that
-// contains one or more reports, an exception is thrown.
+// Deletes a report group. Before you delete a report group, you must delete
+// its reports.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1607,6 +1604,86 @@ func (c *CodeBuild) DescribeTestCasesPagesWithContext(ctx aws.Context, input *De
 	}
 
 	return p.Err()
+}
+
+const opGetReportGroupTrend = "GetReportGroupTrend"
+
+// GetReportGroupTrendRequest generates a "aws/request.Request" representing the
+// client's request for the GetReportGroupTrend operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See GetReportGroupTrend for more information on using the GetReportGroupTrend
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the GetReportGroupTrendRequest method.
+//    req, resp := client.GetReportGroupTrendRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/codebuild-2016-10-06/GetReportGroupTrend
+func (c *CodeBuild) GetReportGroupTrendRequest(input *GetReportGroupTrendInput) (req *request.Request, output *GetReportGroupTrendOutput) {
+	op := &request.Operation{
+		Name:       opGetReportGroupTrend,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &GetReportGroupTrendInput{}
+	}
+
+	output = &GetReportGroupTrendOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// GetReportGroupTrend API operation for AWS CodeBuild.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for AWS CodeBuild's
+// API operation GetReportGroupTrend for usage and error information.
+//
+// Returned Error Types:
+//   * InvalidInputException
+//   The input value that was provided is not valid.
+//
+//   * ResourceNotFoundException
+//   The specified AWS resource cannot be found.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/codebuild-2016-10-06/GetReportGroupTrend
+func (c *CodeBuild) GetReportGroupTrend(input *GetReportGroupTrendInput) (*GetReportGroupTrendOutput, error) {
+	req, out := c.GetReportGroupTrendRequest(input)
+	return out, req.Send()
+}
+
+// GetReportGroupTrendWithContext is the same as GetReportGroupTrend with the addition of
+// the ability to pass a context and additional request options.
+//
+// See GetReportGroupTrend for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *CodeBuild) GetReportGroupTrendWithContext(ctx aws.Context, input *GetReportGroupTrendInput, opts ...request.Option) (*GetReportGroupTrendOutput, error) {
+	req, out := c.GetReportGroupTrendRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
 }
 
 const opGetResourcePolicy = "GetResourcePolicy"
@@ -3606,7 +3683,8 @@ func (c *CodeBuild) RetryBuildBatchRequest(input *RetryBuildBatchInput) (req *re
 
 // RetryBuildBatch API operation for AWS CodeBuild.
 //
-// Restarts a batch build.
+// Restarts a failed batch build. Only batch builds that have failed can be
+// retried.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -4808,7 +4886,7 @@ type Build struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKey *string `locationName:"encryptionKey" min:"1" type:"string"`
 
 	// When the build process ended, expressed in Unix time format.
@@ -5256,7 +5334,7 @@ type BuildBatch struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKey *string `locationName:"encryptionKey" min:"1" type:"string"`
 
 	// The date and time that the batch build ended.
@@ -6335,7 +6413,7 @@ type CreateProjectInput struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKey *string `locationName:"encryptionKey" min:"1" type:"string"`
 
 	// Information about the build environment for the build project.
@@ -7097,6 +7175,16 @@ type DeleteReportGroupInput struct {
 	//
 	// Arn is a required field
 	Arn *string `locationName:"arn" min:"1" type:"string" required:"true"`
+
+	// If true, deletes any reports that belong to a report group before deleting
+	// the report group.
+	//
+	// If false, you must delete any reports in the report group. Use ListReportsForReportGroup
+	// (https://docs.aws.amazon.com/codebuild/latest/APIReference/API_ListReportsForReportGroup.html)
+	// to get the reports in a report group. Use DeleteReport (https://docs.aws.amazon.com/codebuild/latest/APIReference/API_DeleteReport.html)
+	// to delete the reports. If you call DeleteReportGroup for a report group that
+	// contains one or more reports, an exception is thrown.
+	DeleteReports *bool `locationName:"deleteReports" type:"boolean"`
 }
 
 // String returns the string representation
@@ -7128,6 +7216,12 @@ func (s *DeleteReportGroupInput) Validate() error {
 // SetArn sets the Arn field's value.
 func (s *DeleteReportGroupInput) SetArn(v string) *DeleteReportGroupInput {
 	s.Arn = &v
+	return s
+}
+
+// SetDeleteReports sets the DeleteReports field's value.
+func (s *DeleteReportGroupInput) SetDeleteReports(v bool) *DeleteReportGroupInput {
+	s.DeleteReports = &v
 	return s
 }
 
@@ -7752,14 +7846,16 @@ type EnvironmentVariable struct {
 	//
 	//    * PARAMETER_STORE: An environment variable stored in Amazon EC2 Systems
 	//    Manager Parameter Store. To learn how to specify a parameter store environment
-	//    variable, see parameter store reference-key in the buildspec file (https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#parameter-store-build-spec).
+	//    variable, see env/parameter-store (https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.parameter-store)
+	//    in the AWS CodeBuild User Guide.
 	//
 	//    * PLAINTEXT: An environment variable in plain text format. This is the
 	//    default value.
 	//
 	//    * SECRETS_MANAGER: An environment variable stored in AWS Secrets Manager.
-	//    To learn how to specify a secrets manager environment variable, see secrets
-	//    manager reference-key in the buildspec file (https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#secrets-manager-build-spec).
+	//    To learn how to specify a secrets manager environment variable, see env/secrets-manager
+	//    (https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.secrets-manager)
+	//    in the AWS CodeBuild User Guide.
 	Type *string `locationName:"type" type:"string" enum:"EnvironmentVariableType"`
 
 	// The value of the environment variable.
@@ -7856,6 +7952,98 @@ func (s *ExportedEnvironmentVariable) SetName(v string) *ExportedEnvironmentVari
 // SetValue sets the Value field's value.
 func (s *ExportedEnvironmentVariable) SetValue(v string) *ExportedEnvironmentVariable {
 	s.Value = &v
+	return s
+}
+
+type GetReportGroupTrendInput struct {
+	_ struct{} `type:"structure"`
+
+	NumOfReports *int64 `locationName:"numOfReports" min:"1" type:"integer"`
+
+	// ReportGroupArn is a required field
+	ReportGroupArn *string `locationName:"reportGroupArn" min:"1" type:"string" required:"true"`
+
+	// TrendField is a required field
+	TrendField *string `locationName:"trendField" type:"string" required:"true" enum:"ReportGroupTrendFieldType"`
+}
+
+// String returns the string representation
+func (s GetReportGroupTrendInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s GetReportGroupTrendInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *GetReportGroupTrendInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "GetReportGroupTrendInput"}
+	if s.NumOfReports != nil && *s.NumOfReports < 1 {
+		invalidParams.Add(request.NewErrParamMinValue("NumOfReports", 1))
+	}
+	if s.ReportGroupArn == nil {
+		invalidParams.Add(request.NewErrParamRequired("ReportGroupArn"))
+	}
+	if s.ReportGroupArn != nil && len(*s.ReportGroupArn) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("ReportGroupArn", 1))
+	}
+	if s.TrendField == nil {
+		invalidParams.Add(request.NewErrParamRequired("TrendField"))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetNumOfReports sets the NumOfReports field's value.
+func (s *GetReportGroupTrendInput) SetNumOfReports(v int64) *GetReportGroupTrendInput {
+	s.NumOfReports = &v
+	return s
+}
+
+// SetReportGroupArn sets the ReportGroupArn field's value.
+func (s *GetReportGroupTrendInput) SetReportGroupArn(v string) *GetReportGroupTrendInput {
+	s.ReportGroupArn = &v
+	return s
+}
+
+// SetTrendField sets the TrendField field's value.
+func (s *GetReportGroupTrendInput) SetTrendField(v string) *GetReportGroupTrendInput {
+	s.TrendField = &v
+	return s
+}
+
+type GetReportGroupTrendOutput struct {
+	_ struct{} `type:"structure"`
+
+	RawData []*ReportWithRawData `locationName:"rawData" type:"list"`
+
+	Stats *ReportGroupTrendStats `locationName:"stats" type:"structure"`
+}
+
+// String returns the string representation
+func (s GetReportGroupTrendOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s GetReportGroupTrendOutput) GoString() string {
+	return s.String()
+}
+
+// SetRawData sets the RawData field's value.
+func (s *GetReportGroupTrendOutput) SetRawData(v []*ReportWithRawData) *GetReportGroupTrendOutput {
+	s.RawData = v
+	return s
+}
+
+// SetStats sets the Stats field's value.
+func (s *GetReportGroupTrendOutput) SetStats(v *ReportGroupTrendStats) *GetReportGroupTrendOutput {
+	s.Stats = v
 	return s
 }
 
@@ -9680,7 +9868,7 @@ type Project struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKey *string `locationName:"encryptionKey" min:"1" type:"string"`
 
 	// Information about the build environment for this build project.
@@ -9966,13 +10154,13 @@ type ProjectArtifacts struct {
 	// For example:
 	//
 	//    * If path is set to MyArtifacts, namespaceType is set to BUILD_ID, and
-	//    name is set to MyArtifact.zip, then the output artifact is stored in MyArtifacts/build-ID/MyArtifact.zip.
+	//    name is set to MyArtifact.zip, then the output artifact is stored in MyArtifacts/<build-ID>/MyArtifact.zip.
 	//
 	//    * If path is empty, namespaceType is set to NONE, and name is set to "/",
 	//    the output artifact is stored in the root of the output bucket.
 	//
 	//    * If path is set to MyArtifacts, namespaceType is set to BUILD_ID, and
-	//    name is set to "/", the output artifact is stored in MyArtifacts/build-ID .
+	//    name is set to "/", the output artifact is stored in MyArtifacts/<build-ID>.
 	Name *string `locationName:"name" type:"string"`
 
 	// Along with path and name, the pattern that AWS CodeBuild uses to determine
@@ -9990,7 +10178,7 @@ type ProjectArtifacts struct {
 	//    the build ID. This is the default if namespaceType is not specified.
 	//
 	// For example, if path is set to MyArtifacts, namespaceType is set to BUILD_ID,
-	// and name is set to MyArtifact.zip, the output artifact is stored in MyArtifacts/build-ID/MyArtifact.zip.
+	// and name is set to MyArtifact.zip, the output artifact is stored in MyArtifacts/<build-ID>/MyArtifact.zip.
 	NamespaceType *string `locationName:"namespaceType" type:"string" enum:"ArtifactNamespace"`
 
 	// If this flag is set, a name specified in the buildspec file overrides the
@@ -10239,32 +10427,50 @@ type ProjectCache struct {
 	//    * S3: This is the S3 bucket name/prefix.
 	Location *string `locationName:"location" type:"string"`
 
-	// If you use a LOCAL cache, the local cache mode. You can use one or more local
-	// cache modes at the same time.
+	// An array of strings that specify the local cache modes. You can use one or
+	// more local cache modes at the same time. This is only used for LOCAL cache
+	// types.
 	//
-	//    * LOCAL_SOURCE_CACHE mode caches Git metadata for primary and secondary
-	//    sources. After the cache is created, subsequent builds pull only the change
-	//    between commits. This mode is a good choice for projects with a clean
-	//    working directory and a source that is a large Git repository. If you
-	//    choose this option and your project does not use a Git repository (GitHub,
-	//    GitHub Enterprise, or Bitbucket), the option is ignored.
+	// Possible values are:
 	//
-	//    * LOCAL_DOCKER_LAYER_CACHE mode caches existing Docker layers. This mode
-	//    is a good choice for projects that build or pull large Docker images.
-	//    It can prevent the performance issues caused by pulling large Docker images
-	//    down from the network. You can use a Docker layer cache in the Linux environment
-	//    only. The privileged flag must be set so that your project has the required
-	//    Docker permissions. You should consider the security implications before
-	//    you use a Docker layer cache.
+	// LOCAL_SOURCE_CACHE
 	//
-	//    * LOCAL_CUSTOM_CACHE mode caches directories you specify in the buildspec
-	//    file. This mode is a good choice if your build scenario is not suited
-	//    to one of the other three local cache modes. If you use a custom cache:
-	//    Only directories can be specified for caching. You cannot specify individual
-	//    files. Symlinks are used to reference cached directories. Cached directories
-	//    are linked to your build before it downloads its project sources. Cached
-	//    items are overridden if a source item has the same name. Directories are
-	//    specified using cache paths in the buildspec file.
+	// Caches Git metadata for primary and secondary sources. After the cache is
+	// created, subsequent builds pull only the change between commits. This mode
+	// is a good choice for projects with a clean working directory and a source
+	// that is a large Git repository. If you choose this option and your project
+	// does not use a Git repository (GitHub, GitHub Enterprise, or Bitbucket),
+	// the option is ignored.
+	//
+	// LOCAL_DOCKER_LAYER_CACHE
+	//
+	// Caches existing Docker layers. This mode is a good choice for projects that
+	// build or pull large Docker images. It can prevent the performance issues
+	// caused by pulling large Docker images down from the network.
+	//
+	//    * You can use a Docker layer cache in the Linux environment only.
+	//
+	//    * The privileged flag must be set so that your project has the required
+	//    Docker permissions.
+	//
+	//    * You should consider the security implications before you use a Docker
+	//    layer cache.
+	//
+	// LOCAL_CUSTOM_CACHE
+	//
+	// Caches directories you specify in the buildspec file. This mode is a good
+	// choice if your build scenario is not suited to one of the other three local
+	// cache modes. If you use a custom cache:
+	//
+	//    * Only directories can be specified for caching. You cannot specify individual
+	//    files.
+	//
+	//    * Symlinks are used to reference cached directories.
+	//
+	//    * Cached directories are linked to your build before it downloads its
+	//    project sources. Cached items are overridden if a source item has the
+	//    same name. Directories are specified using cache paths in the buildspec
+	//    file.
 	Modes []*string `locationName:"modes" type:"list"`
 
 	// The type of cache used by the build project. Valid values include:
@@ -10325,7 +10531,10 @@ func (s *ProjectCache) SetType(v string) *ProjectCache {
 type ProjectEnvironment struct {
 	_ struct{} `type:"structure"`
 
-	// The certificate to use with this build project.
+	// The ARN of the Amazon Simple Storage Service (Amazon S3) bucket, path prefix,
+	// and object key that contains the PEM-encoded certificate for the build project.
+	// For more information, see certificate (https://docs.aws.amazon.com/codebuild/latest/userguide/create-project-cli.html#cli.environment.certificate)
+	// in the AWS CodeBuild User Guide.
 	Certificate *string `locationName:"certificate" type:"string"`
 
 	// Information about the compute resources the build project uses. Available
@@ -10366,12 +10575,13 @@ type ProjectEnvironment struct {
 	// The image tag or image digest that identifies the Docker image to use for
 	// this build project. Use the following formats:
 	//
-	//    * For an image tag: registry/repository:tag. For example, to specify an
-	//    image with the tag "latest," use registry/repository:latest.
+	//    * For an image tag: <registry>/<repository>:<tag>. For example, in the
+	//    Docker repository that CodeBuild uses to manage its Docker images, this
+	//    would be aws/codebuild/standard:4.0.
 	//
-	//    * For an image digest: registry/repository@digest. For example, to specify
-	//    an image with the digest "sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf,"
-	//    use registry/repository@sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf.
+	//    * For an image digest: <registry>/<repository>@<digest>. For example,
+	//    to specify an image with the digest "sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf,"
+	//    use <registry>/<repository>@sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf.
 	//
 	// Image is a required field
 	Image *string `locationName:"image" min:"1" type:"string" required:"true"`
@@ -10543,8 +10753,8 @@ type ProjectFileSystemLocation struct {
 
 	// The name used to access a file system created by Amazon EFS. CodeBuild creates
 	// an environment variable by appending the identifier in all capital letters
-	// to CODEBUILD_. For example, if you specify my-efs for identifier, a new environment
-	// variable is create named CODEBUILD_MY-EFS.
+	// to CODEBUILD_. For example, if you specify my_efs for identifier, a new environment
+	// variable is create named CODEBUILD_MY_EFS.
 	//
 	// The identifier is used to mount your file system.
 	Identifier *string `locationName:"identifier" type:"string"`
@@ -10661,13 +10871,12 @@ type ProjectSource struct {
 	//
 	//    * For source code in an AWS CodeCommit repository, the HTTPS clone URL
 	//    to the repository that contains the source code and the buildspec file
-	//    (for example, https://git-codecommit.region-ID.amazonaws.com/v1/repos/repo-name
-	//    ).
+	//    (for example, https://git-codecommit.<region-ID>.amazonaws.com/v1/repos/<repo-name>).
 	//
 	//    * For source code in an Amazon Simple Storage Service (Amazon S3) input
 	//    bucket, one of the following. The path to the ZIP file that contains the
-	//    source code (for example, bucket-name/path/to/object-name.zip). The path
-	//    to the folder that contains the source code (for example, bucket-name/path/to/source-code/folder/).
+	//    source code (for example, <bucket-name>/<path>/<object-name>.zip). The
+	//    path to the folder that contains the source code (for example, <bucket-name>/<path-to-source-code>/<folder>/).
 	//
 	//    * For source code in a GitHub repository, the HTTPS clone URL to the repository
 	//    that contains the source and the buildspec file. You must connect your
@@ -11290,6 +11499,8 @@ type ReportGroup struct {
 	// The name of a ReportGroup.
 	Name *string `locationName:"name" min:"2" type:"string"`
 
+	Status *string `locationName:"status" type:"string" enum:"ReportGroupStatusType"`
+
 	// A list of tag key and value pairs associated with this report group.
 	//
 	// These tags are available for use by AWS services that support AWS CodeBuild
@@ -11340,6 +11551,12 @@ func (s *ReportGroup) SetName(v string) *ReportGroup {
 	return s
 }
 
+// SetStatus sets the Status field's value.
+func (s *ReportGroup) SetStatus(v string) *ReportGroup {
+	s.Status = &v
+	return s
+}
+
 // SetTags sets the Tags field's value.
 func (s *ReportGroup) SetTags(v []*Tag) *ReportGroup {
 	s.Tags = v
@@ -11349,6 +11566,74 @@ func (s *ReportGroup) SetTags(v []*Tag) *ReportGroup {
 // SetType sets the Type field's value.
 func (s *ReportGroup) SetType(v string) *ReportGroup {
 	s.Type = &v
+	return s
+}
+
+type ReportGroupTrendStats struct {
+	_ struct{} `type:"structure"`
+
+	Average *string `locationName:"average" type:"string"`
+
+	Max *string `locationName:"max" type:"string"`
+
+	Min *string `locationName:"min" type:"string"`
+}
+
+// String returns the string representation
+func (s ReportGroupTrendStats) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ReportGroupTrendStats) GoString() string {
+	return s.String()
+}
+
+// SetAverage sets the Average field's value.
+func (s *ReportGroupTrendStats) SetAverage(v string) *ReportGroupTrendStats {
+	s.Average = &v
+	return s
+}
+
+// SetMax sets the Max field's value.
+func (s *ReportGroupTrendStats) SetMax(v string) *ReportGroupTrendStats {
+	s.Max = &v
+	return s
+}
+
+// SetMin sets the Min field's value.
+func (s *ReportGroupTrendStats) SetMin(v string) *ReportGroupTrendStats {
+	s.Min = &v
+	return s
+}
+
+type ReportWithRawData struct {
+	_ struct{} `type:"structure"`
+
+	Data *string `locationName:"data" type:"string"`
+
+	ReportArn *string `locationName:"reportArn" min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s ReportWithRawData) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ReportWithRawData) GoString() string {
+	return s.String()
+}
+
+// SetData sets the Data field's value.
+func (s *ReportWithRawData) SetData(v string) *ReportWithRawData {
+	s.Data = &v
+	return s
+}
+
+// SetReportArn sets the ReportArn field's value.
+func (s *ReportWithRawData) SetReportArn(v string) *ReportWithRawData {
+	s.ReportArn = &v
 	return s
 }
 
@@ -11955,7 +12240,7 @@ type StartBuildBatchInput struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKeyOverride *string `locationName:"encryptionKeyOverride" min:"1" type:"string"`
 
 	// A container type for this batch build that overrides the one specified in
@@ -12471,7 +12756,7 @@ type StartBuildInput struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKeyOverride *string `locationName:"encryptionKeyOverride" min:"1" type:"string"`
 
 	// A container type for this build that overrides the one specified in the build
@@ -13205,12 +13490,28 @@ func (s *TestCase) SetTestRawDataPath(v string) *TestCase {
 	return s
 }
 
-// A filter used to return specific types of test cases.
+// A filter used to return specific types of test cases. In order to pass the
+// filter, the report must meet all of the filter properties.
 type TestCaseFilter struct {
 	_ struct{} `type:"structure"`
 
-	// The status used to filter test cases. Valid statuses are SUCCEEDED, FAILED,
-	// ERROR, SKIPPED, and UNKNOWN. A TestCaseFilter can have one status.
+	// A keyword that is used to filter on the name or the prefix of the test cases.
+	// Only test cases where the keyword is a substring of the name or the prefix
+	// will be returned.
+	Keyword *string `locationName:"keyword" type:"string"`
+
+	// The status used to filter test cases. A TestCaseFilter can have one status.
+	// Valid values are:
+	//
+	//    * SUCCEEDED
+	//
+	//    * FAILED
+	//
+	//    * ERROR
+	//
+	//    * SKIPPED
+	//
+	//    * UNKNOWN
 	Status *string `locationName:"status" type:"string"`
 }
 
@@ -13222,6 +13523,12 @@ func (s TestCaseFilter) String() string {
 // GoString returns the string representation
 func (s TestCaseFilter) GoString() string {
 	return s.String()
+}
+
+// SetKeyword sets the Keyword field's value.
+func (s *TestCaseFilter) SetKeyword(v string) *TestCaseFilter {
+	s.Keyword = &v
+	return s
 }
 
 // SetStatus sets the Status field's value.
@@ -13308,7 +13615,7 @@ type UpdateProjectInput struct {
 	// if your service role has permission to that key.
 	//
 	// You can specify either the Amazon Resource Name (ARN) of the CMK or, if available,
-	// the CMK's alias (using the format alias/alias-name ).
+	// the CMK's alias (using the format alias/<alias-name>).
 	EncryptionKey *string `locationName:"encryptionKey" min:"1" type:"string"`
 
 	// Information to be changed about the build environment for the build project.
@@ -14125,6 +14432,14 @@ const (
 	ArtifactNamespaceBuildId = "BUILD_ID"
 )
 
+// ArtifactNamespace_Values returns all elements of the ArtifactNamespace enum
+func ArtifactNamespace_Values() []string {
+	return []string{
+		ArtifactNamespaceNone,
+		ArtifactNamespaceBuildId,
+	}
+}
+
 const (
 	// ArtifactPackagingNone is a ArtifactPackaging enum value
 	ArtifactPackagingNone = "NONE"
@@ -14132,6 +14447,14 @@ const (
 	// ArtifactPackagingZip is a ArtifactPackaging enum value
 	ArtifactPackagingZip = "ZIP"
 )
+
+// ArtifactPackaging_Values returns all elements of the ArtifactPackaging enum
+func ArtifactPackaging_Values() []string {
+	return []string{
+		ArtifactPackagingNone,
+		ArtifactPackagingZip,
+	}
+}
 
 const (
 	// ArtifactsTypeCodepipeline is a ArtifactsType enum value
@@ -14144,6 +14467,15 @@ const (
 	ArtifactsTypeNoArtifacts = "NO_ARTIFACTS"
 )
 
+// ArtifactsType_Values returns all elements of the ArtifactsType enum
+func ArtifactsType_Values() []string {
+	return []string{
+		ArtifactsTypeCodepipeline,
+		ArtifactsTypeS3,
+		ArtifactsTypeNoArtifacts,
+	}
+}
+
 const (
 	// AuthTypeOauth is a AuthType enum value
 	AuthTypeOauth = "OAUTH"
@@ -14154,6 +14486,15 @@ const (
 	// AuthTypePersonalAccessToken is a AuthType enum value
 	AuthTypePersonalAccessToken = "PERSONAL_ACCESS_TOKEN"
 )
+
+// AuthType_Values returns all elements of the AuthType enum
+func AuthType_Values() []string {
+	return []string{
+		AuthTypeOauth,
+		AuthTypeBasicAuth,
+		AuthTypePersonalAccessToken,
+	}
+}
 
 const (
 	// BuildBatchPhaseTypeSubmitted is a BuildBatchPhaseType enum value
@@ -14177,6 +14518,19 @@ const (
 	// BuildBatchPhaseTypeStopped is a BuildBatchPhaseType enum value
 	BuildBatchPhaseTypeStopped = "STOPPED"
 )
+
+// BuildBatchPhaseType_Values returns all elements of the BuildBatchPhaseType enum
+func BuildBatchPhaseType_Values() []string {
+	return []string{
+		BuildBatchPhaseTypeSubmitted,
+		BuildBatchPhaseTypeDownloadBatchspec,
+		BuildBatchPhaseTypeInProgress,
+		BuildBatchPhaseTypeCombineArtifacts,
+		BuildBatchPhaseTypeSucceeded,
+		BuildBatchPhaseTypeFailed,
+		BuildBatchPhaseTypeStopped,
+	}
+}
 
 const (
 	// BuildPhaseTypeSubmitted is a BuildPhaseType enum value
@@ -14213,6 +14567,23 @@ const (
 	BuildPhaseTypeCompleted = "COMPLETED"
 )
 
+// BuildPhaseType_Values returns all elements of the BuildPhaseType enum
+func BuildPhaseType_Values() []string {
+	return []string{
+		BuildPhaseTypeSubmitted,
+		BuildPhaseTypeQueued,
+		BuildPhaseTypeProvisioning,
+		BuildPhaseTypeDownloadSource,
+		BuildPhaseTypeInstall,
+		BuildPhaseTypePreBuild,
+		BuildPhaseTypeBuild,
+		BuildPhaseTypePostBuild,
+		BuildPhaseTypeUploadArtifacts,
+		BuildPhaseTypeFinalizing,
+		BuildPhaseTypeCompleted,
+	}
+}
+
 const (
 	// CacheModeLocalDockerLayerCache is a CacheMode enum value
 	CacheModeLocalDockerLayerCache = "LOCAL_DOCKER_LAYER_CACHE"
@@ -14224,6 +14595,15 @@ const (
 	CacheModeLocalCustomCache = "LOCAL_CUSTOM_CACHE"
 )
 
+// CacheMode_Values returns all elements of the CacheMode enum
+func CacheMode_Values() []string {
+	return []string{
+		CacheModeLocalDockerLayerCache,
+		CacheModeLocalSourceCache,
+		CacheModeLocalCustomCache,
+	}
+}
+
 const (
 	// CacheTypeNoCache is a CacheType enum value
 	CacheTypeNoCache = "NO_CACHE"
@@ -14234,6 +14614,15 @@ const (
 	// CacheTypeLocal is a CacheType enum value
 	CacheTypeLocal = "LOCAL"
 )
+
+// CacheType_Values returns all elements of the CacheType enum
+func CacheType_Values() []string {
+	return []string{
+		CacheTypeNoCache,
+		CacheTypeS3,
+		CacheTypeLocal,
+	}
+}
 
 const (
 	// ComputeTypeBuildGeneral1Small is a ComputeType enum value
@@ -14249,10 +14638,27 @@ const (
 	ComputeTypeBuildGeneral12xlarge = "BUILD_GENERAL1_2XLARGE"
 )
 
+// ComputeType_Values returns all elements of the ComputeType enum
+func ComputeType_Values() []string {
+	return []string{
+		ComputeTypeBuildGeneral1Small,
+		ComputeTypeBuildGeneral1Medium,
+		ComputeTypeBuildGeneral1Large,
+		ComputeTypeBuildGeneral12xlarge,
+	}
+}
+
 const (
 	// CredentialProviderTypeSecretsManager is a CredentialProviderType enum value
 	CredentialProviderTypeSecretsManager = "SECRETS_MANAGER"
 )
+
+// CredentialProviderType_Values returns all elements of the CredentialProviderType enum
+func CredentialProviderType_Values() []string {
+	return []string{
+		CredentialProviderTypeSecretsManager,
+	}
+}
 
 const (
 	// EnvironmentTypeWindowsContainer is a EnvironmentType enum value
@@ -14271,6 +14677,17 @@ const (
 	EnvironmentTypeWindowsServer2019Container = "WINDOWS_SERVER_2019_CONTAINER"
 )
 
+// EnvironmentType_Values returns all elements of the EnvironmentType enum
+func EnvironmentType_Values() []string {
+	return []string{
+		EnvironmentTypeWindowsContainer,
+		EnvironmentTypeLinuxContainer,
+		EnvironmentTypeLinuxGpuContainer,
+		EnvironmentTypeArmContainer,
+		EnvironmentTypeWindowsServer2019Container,
+	}
+}
+
 const (
 	// EnvironmentVariableTypePlaintext is a EnvironmentVariableType enum value
 	EnvironmentVariableTypePlaintext = "PLAINTEXT"
@@ -14282,10 +14699,26 @@ const (
 	EnvironmentVariableTypeSecretsManager = "SECRETS_MANAGER"
 )
 
+// EnvironmentVariableType_Values returns all elements of the EnvironmentVariableType enum
+func EnvironmentVariableType_Values() []string {
+	return []string{
+		EnvironmentVariableTypePlaintext,
+		EnvironmentVariableTypeParameterStore,
+		EnvironmentVariableTypeSecretsManager,
+	}
+}
+
 const (
 	// FileSystemTypeEfs is a FileSystemType enum value
 	FileSystemTypeEfs = "EFS"
 )
+
+// FileSystemType_Values returns all elements of the FileSystemType enum
+func FileSystemType_Values() []string {
+	return []string{
+		FileSystemTypeEfs,
+	}
+}
 
 const (
 	// ImagePullCredentialsTypeCodebuild is a ImagePullCredentialsType enum value
@@ -14294,6 +14727,14 @@ const (
 	// ImagePullCredentialsTypeServiceRole is a ImagePullCredentialsType enum value
 	ImagePullCredentialsTypeServiceRole = "SERVICE_ROLE"
 )
+
+// ImagePullCredentialsType_Values returns all elements of the ImagePullCredentialsType enum
+func ImagePullCredentialsType_Values() []string {
+	return []string{
+		ImagePullCredentialsTypeCodebuild,
+		ImagePullCredentialsTypeServiceRole,
+	}
+}
 
 const (
 	// LanguageTypeJava is a LanguageType enum value
@@ -14327,6 +14768,22 @@ const (
 	LanguageTypePhp = "PHP"
 )
 
+// LanguageType_Values returns all elements of the LanguageType enum
+func LanguageType_Values() []string {
+	return []string{
+		LanguageTypeJava,
+		LanguageTypePython,
+		LanguageTypeNodeJs,
+		LanguageTypeRuby,
+		LanguageTypeGolang,
+		LanguageTypeDocker,
+		LanguageTypeAndroid,
+		LanguageTypeDotnet,
+		LanguageTypeBase,
+		LanguageTypePhp,
+	}
+}
+
 const (
 	// LogsConfigStatusTypeEnabled is a LogsConfigStatusType enum value
 	LogsConfigStatusTypeEnabled = "ENABLED"
@@ -14334,6 +14791,14 @@ const (
 	// LogsConfigStatusTypeDisabled is a LogsConfigStatusType enum value
 	LogsConfigStatusTypeDisabled = "DISABLED"
 )
+
+// LogsConfigStatusType_Values returns all elements of the LogsConfigStatusType enum
+func LogsConfigStatusType_Values() []string {
+	return []string{
+		LogsConfigStatusTypeEnabled,
+		LogsConfigStatusTypeDisabled,
+	}
+}
 
 const (
 	// PlatformTypeDebian is a PlatformType enum value
@@ -14349,6 +14814,16 @@ const (
 	PlatformTypeWindowsServer = "WINDOWS_SERVER"
 )
 
+// PlatformType_Values returns all elements of the PlatformType enum
+func PlatformType_Values() []string {
+	return []string{
+		PlatformTypeDebian,
+		PlatformTypeAmazonLinux,
+		PlatformTypeUbuntu,
+		PlatformTypeWindowsServer,
+	}
+}
+
 const (
 	// ProjectSortByTypeName is a ProjectSortByType enum value
 	ProjectSortByTypeName = "NAME"
@@ -14360,6 +14835,15 @@ const (
 	ProjectSortByTypeLastModifiedTime = "LAST_MODIFIED_TIME"
 )
 
+// ProjectSortByType_Values returns all elements of the ProjectSortByType enum
+func ProjectSortByType_Values() []string {
+	return []string{
+		ProjectSortByTypeName,
+		ProjectSortByTypeCreatedTime,
+		ProjectSortByTypeLastModifiedTime,
+	}
+}
+
 const (
 	// ReportCodeCoverageSortByTypeLineCoveragePercentage is a ReportCodeCoverageSortByType enum value
 	ReportCodeCoverageSortByTypeLineCoveragePercentage = "LINE_COVERAGE_PERCENTAGE"
@@ -14368,6 +14852,14 @@ const (
 	ReportCodeCoverageSortByTypeFilePath = "FILE_PATH"
 )
 
+// ReportCodeCoverageSortByType_Values returns all elements of the ReportCodeCoverageSortByType enum
+func ReportCodeCoverageSortByType_Values() []string {
+	return []string{
+		ReportCodeCoverageSortByTypeLineCoveragePercentage,
+		ReportCodeCoverageSortByTypeFilePath,
+	}
+}
+
 const (
 	// ReportExportConfigTypeS3 is a ReportExportConfigType enum value
 	ReportExportConfigTypeS3 = "S3"
@@ -14375,6 +14867,14 @@ const (
 	// ReportExportConfigTypeNoExport is a ReportExportConfigType enum value
 	ReportExportConfigTypeNoExport = "NO_EXPORT"
 )
+
+// ReportExportConfigType_Values returns all elements of the ReportExportConfigType enum
+func ReportExportConfigType_Values() []string {
+	return []string{
+		ReportExportConfigTypeS3,
+		ReportExportConfigTypeNoExport,
+	}
+}
 
 const (
 	// ReportGroupSortByTypeName is a ReportGroupSortByType enum value
@@ -14387,6 +14887,75 @@ const (
 	ReportGroupSortByTypeLastModifiedTime = "LAST_MODIFIED_TIME"
 )
 
+// ReportGroupSortByType_Values returns all elements of the ReportGroupSortByType enum
+func ReportGroupSortByType_Values() []string {
+	return []string{
+		ReportGroupSortByTypeName,
+		ReportGroupSortByTypeCreatedTime,
+		ReportGroupSortByTypeLastModifiedTime,
+	}
+}
+
+const (
+	// ReportGroupStatusTypeActive is a ReportGroupStatusType enum value
+	ReportGroupStatusTypeActive = "ACTIVE"
+
+	// ReportGroupStatusTypeDeleting is a ReportGroupStatusType enum value
+	ReportGroupStatusTypeDeleting = "DELETING"
+)
+
+// ReportGroupStatusType_Values returns all elements of the ReportGroupStatusType enum
+func ReportGroupStatusType_Values() []string {
+	return []string{
+		ReportGroupStatusTypeActive,
+		ReportGroupStatusTypeDeleting,
+	}
+}
+
+const (
+	// ReportGroupTrendFieldTypePassRate is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypePassRate = "PASS_RATE"
+
+	// ReportGroupTrendFieldTypeDuration is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeDuration = "DURATION"
+
+	// ReportGroupTrendFieldTypeTotal is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeTotal = "TOTAL"
+
+	// ReportGroupTrendFieldTypeLineCoverage is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeLineCoverage = "LINE_COVERAGE"
+
+	// ReportGroupTrendFieldTypeLinesCovered is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeLinesCovered = "LINES_COVERED"
+
+	// ReportGroupTrendFieldTypeLinesMissed is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeLinesMissed = "LINES_MISSED"
+
+	// ReportGroupTrendFieldTypeBranchCoverage is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeBranchCoverage = "BRANCH_COVERAGE"
+
+	// ReportGroupTrendFieldTypeBranchesCovered is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeBranchesCovered = "BRANCHES_COVERED"
+
+	// ReportGroupTrendFieldTypeBranchesMissed is a ReportGroupTrendFieldType enum value
+	ReportGroupTrendFieldTypeBranchesMissed = "BRANCHES_MISSED"
+)
+
+// ReportGroupTrendFieldType_Values returns all elements of the ReportGroupTrendFieldType enum
+func ReportGroupTrendFieldType_Values() []string {
+	return []string{
+		ReportGroupTrendFieldTypePassRate,
+		ReportGroupTrendFieldTypeDuration,
+		ReportGroupTrendFieldTypeTotal,
+		ReportGroupTrendFieldTypeLineCoverage,
+		ReportGroupTrendFieldTypeLinesCovered,
+		ReportGroupTrendFieldTypeLinesMissed,
+		ReportGroupTrendFieldTypeBranchCoverage,
+		ReportGroupTrendFieldTypeBranchesCovered,
+		ReportGroupTrendFieldTypeBranchesMissed,
+	}
+}
+
 const (
 	// ReportPackagingTypeZip is a ReportPackagingType enum value
 	ReportPackagingTypeZip = "ZIP"
@@ -14394,6 +14963,14 @@ const (
 	// ReportPackagingTypeNone is a ReportPackagingType enum value
 	ReportPackagingTypeNone = "NONE"
 )
+
+// ReportPackagingType_Values returns all elements of the ReportPackagingType enum
+func ReportPackagingType_Values() []string {
+	return []string{
+		ReportPackagingTypeZip,
+		ReportPackagingTypeNone,
+	}
+}
 
 const (
 	// ReportStatusTypeGenerating is a ReportStatusType enum value
@@ -14412,6 +14989,17 @@ const (
 	ReportStatusTypeDeleting = "DELETING"
 )
 
+// ReportStatusType_Values returns all elements of the ReportStatusType enum
+func ReportStatusType_Values() []string {
+	return []string{
+		ReportStatusTypeGenerating,
+		ReportStatusTypeSucceeded,
+		ReportStatusTypeFailed,
+		ReportStatusTypeIncomplete,
+		ReportStatusTypeDeleting,
+	}
+}
+
 const (
 	// ReportTypeTest is a ReportType enum value
 	ReportTypeTest = "TEST"
@@ -14420,6 +15008,14 @@ const (
 	ReportTypeCodeCoverage = "CODE_COVERAGE"
 )
 
+// ReportType_Values returns all elements of the ReportType enum
+func ReportType_Values() []string {
+	return []string{
+		ReportTypeTest,
+		ReportTypeCodeCoverage,
+	}
+}
+
 const (
 	// RetryBuildBatchTypeRetryAllBuilds is a RetryBuildBatchType enum value
 	RetryBuildBatchTypeRetryAllBuilds = "RETRY_ALL_BUILDS"
@@ -14427,6 +15023,14 @@ const (
 	// RetryBuildBatchTypeRetryFailedBuilds is a RetryBuildBatchType enum value
 	RetryBuildBatchTypeRetryFailedBuilds = "RETRY_FAILED_BUILDS"
 )
+
+// RetryBuildBatchType_Values returns all elements of the RetryBuildBatchType enum
+func RetryBuildBatchType_Values() []string {
+	return []string{
+		RetryBuildBatchTypeRetryAllBuilds,
+		RetryBuildBatchTypeRetryFailedBuilds,
+	}
+}
 
 const (
 	// ServerTypeGithub is a ServerType enum value
@@ -14439,6 +15043,15 @@ const (
 	ServerTypeGithubEnterprise = "GITHUB_ENTERPRISE"
 )
 
+// ServerType_Values returns all elements of the ServerType enum
+func ServerType_Values() []string {
+	return []string{
+		ServerTypeGithub,
+		ServerTypeBitbucket,
+		ServerTypeGithubEnterprise,
+	}
+}
+
 const (
 	// SharedResourceSortByTypeArn is a SharedResourceSortByType enum value
 	SharedResourceSortByTypeArn = "ARN"
@@ -14446,6 +15059,14 @@ const (
 	// SharedResourceSortByTypeModifiedTime is a SharedResourceSortByType enum value
 	SharedResourceSortByTypeModifiedTime = "MODIFIED_TIME"
 )
+
+// SharedResourceSortByType_Values returns all elements of the SharedResourceSortByType enum
+func SharedResourceSortByType_Values() []string {
+	return []string{
+		SharedResourceSortByTypeArn,
+		SharedResourceSortByTypeModifiedTime,
+	}
+}
 
 const (
 	// SortOrderTypeAscending is a SortOrderType enum value
@@ -14455,10 +15076,25 @@ const (
 	SortOrderTypeDescending = "DESCENDING"
 )
 
+// SortOrderType_Values returns all elements of the SortOrderType enum
+func SortOrderType_Values() []string {
+	return []string{
+		SortOrderTypeAscending,
+		SortOrderTypeDescending,
+	}
+}
+
 const (
 	// SourceAuthTypeOauth is a SourceAuthType enum value
 	SourceAuthTypeOauth = "OAUTH"
 )
+
+// SourceAuthType_Values returns all elements of the SourceAuthType enum
+func SourceAuthType_Values() []string {
+	return []string{
+		SourceAuthTypeOauth,
+	}
+}
 
 const (
 	// SourceTypeCodecommit is a SourceType enum value
@@ -14483,6 +15119,19 @@ const (
 	SourceTypeNoSource = "NO_SOURCE"
 )
 
+// SourceType_Values returns all elements of the SourceType enum
+func SourceType_Values() []string {
+	return []string{
+		SourceTypeCodecommit,
+		SourceTypeCodepipeline,
+		SourceTypeGithub,
+		SourceTypeS3,
+		SourceTypeBitbucket,
+		SourceTypeGithubEnterprise,
+		SourceTypeNoSource,
+	}
+}
+
 const (
 	// StatusTypeSucceeded is a StatusType enum value
 	StatusTypeSucceeded = "SUCCEEDED"
@@ -14503,6 +15152,18 @@ const (
 	StatusTypeStopped = "STOPPED"
 )
 
+// StatusType_Values returns all elements of the StatusType enum
+func StatusType_Values() []string {
+	return []string{
+		StatusTypeSucceeded,
+		StatusTypeFailed,
+		StatusTypeFault,
+		StatusTypeTimedOut,
+		StatusTypeInProgress,
+		StatusTypeStopped,
+	}
+}
+
 const (
 	// WebhookBuildTypeBuild is a WebhookBuildType enum value
 	WebhookBuildTypeBuild = "BUILD"
@@ -14510,6 +15171,14 @@ const (
 	// WebhookBuildTypeBuildBatch is a WebhookBuildType enum value
 	WebhookBuildTypeBuildBatch = "BUILD_BATCH"
 )
+
+// WebhookBuildType_Values returns all elements of the WebhookBuildType enum
+func WebhookBuildType_Values() []string {
+	return []string{
+		WebhookBuildTypeBuild,
+		WebhookBuildTypeBuildBatch,
+	}
+}
 
 const (
 	// WebhookFilterTypeEvent is a WebhookFilterType enum value
@@ -14530,3 +15199,15 @@ const (
 	// WebhookFilterTypeCommitMessage is a WebhookFilterType enum value
 	WebhookFilterTypeCommitMessage = "COMMIT_MESSAGE"
 )
+
+// WebhookFilterType_Values returns all elements of the WebhookFilterType enum
+func WebhookFilterType_Values() []string {
+	return []string{
+		WebhookFilterTypeEvent,
+		WebhookFilterTypeBaseRef,
+		WebhookFilterTypeHeadRef,
+		WebhookFilterTypeActorAccountId,
+		WebhookFilterTypeFilePath,
+		WebhookFilterTypeCommitMessage,
+	}
+}

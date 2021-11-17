@@ -3221,10 +3221,16 @@ type DiscoverInstancesInput struct {
 	// NamespaceName is a required field
 	NamespaceName *string `type:"string" required:"true"`
 
-	// A string map that contains attributes with values that you can use to filter
-	// instances by any custom attribute that you specified when you registered
-	// the instance. Only instances that match all the specified key/value pairs
-	// will be returned.
+	// Opportunistic filters to scope the results based on custom attributes. If
+	// there are instances that match both the filters specified in both the QueryParameters
+	// parameter and this parameter, they are returned. Otherwise, these filters
+	// are ignored and only instances that match the filters specified in the QueryParameters
+	// parameter are returned.
+	OptionalParameters map[string]*string `type:"map"`
+
+	// Filters to scope the results based on custom attributes for the instance.
+	// For example, {version=v1, az=1a}. Only instances that match all the specified
+	// key-value pairs will be returned.
 	QueryParameters map[string]*string `type:"map"`
 
 	// The name of the service that you specified when you registered the instance.
@@ -3277,6 +3283,12 @@ func (s *DiscoverInstancesInput) SetMaxResults(v int64) *DiscoverInstancesInput 
 // SetNamespaceName sets the NamespaceName field's value.
 func (s *DiscoverInstancesInput) SetNamespaceName(v string) *DiscoverInstancesInput {
 	s.NamespaceName = &v
+	return s
+}
+
+// SetOptionalParameters sets the OptionalParameters field's value.
+func (s *DiscoverInstancesInput) SetOptionalParameters(v map[string]*string) *DiscoverInstancesInput {
+	s.OptionalParameters = v
 	return s
 }
 
@@ -4286,17 +4298,19 @@ func (s *HealthCheckConfig) SetType(v string) *HealthCheckConfig {
 type HealthCheckCustomConfig struct {
 	_ struct{} `type:"structure"`
 
+	//
+	// This parameter has been deprecated and is always set to 1. AWS Cloud Map
+	// waits for approximately 30 seconds after receiving an UpdateInstanceCustomHealthStatus
+	// request before changing the status of the service instance.
+	//
 	// The number of 30-second intervals that you want AWS Cloud Map to wait after
 	// receiving an UpdateInstanceCustomHealthStatus request before it changes the
-	// health status of a service instance. For example, suppose you specify a value
-	// of 2 for FailureTheshold, and then your application sends an UpdateInstanceCustomHealthStatus
-	// request. AWS Cloud Map waits for approximately 60 seconds (2 x 30) before
-	// changing the status of the service instance based on that request.
+	// health status of a service instance.
 	//
 	// Sending a second or subsequent UpdateInstanceCustomHealthStatus request with
-	// the same value before FailureThreshold x 30 seconds has passed doesn't accelerate
-	// the change. AWS Cloud Map still waits FailureThreshold x 30 seconds after
-	// the first request to make the change.
+	// the same value before 30 seconds has passed doesn't accelerate the change.
+	// AWS Cloud Map still waits 30 seconds after the first request to make the
+	// change.
 	FailureThreshold *int64 `min:"1" type:"integer"`
 }
 
@@ -7544,6 +7558,14 @@ const (
 	CustomHealthStatusUnhealthy = "UNHEALTHY"
 )
 
+// CustomHealthStatus_Values returns all elements of the CustomHealthStatus enum
+func CustomHealthStatus_Values() []string {
+	return []string{
+		CustomHealthStatusHealthy,
+		CustomHealthStatusUnhealthy,
+	}
+}
+
 const (
 	// FilterConditionEq is a FilterCondition enum value
 	FilterConditionEq = "EQ"
@@ -7554,6 +7576,15 @@ const (
 	// FilterConditionBetween is a FilterCondition enum value
 	FilterConditionBetween = "BETWEEN"
 )
+
+// FilterCondition_Values returns all elements of the FilterCondition enum
+func FilterCondition_Values() []string {
+	return []string{
+		FilterConditionEq,
+		FilterConditionIn,
+		FilterConditionBetween,
+	}
+}
 
 const (
 	// HealthCheckTypeHttp is a HealthCheckType enum value
@@ -7566,6 +7597,15 @@ const (
 	HealthCheckTypeTcp = "TCP"
 )
 
+// HealthCheckType_Values returns all elements of the HealthCheckType enum
+func HealthCheckType_Values() []string {
+	return []string{
+		HealthCheckTypeHttp,
+		HealthCheckTypeHttps,
+		HealthCheckTypeTcp,
+	}
+}
+
 const (
 	// HealthStatusHealthy is a HealthStatus enum value
 	HealthStatusHealthy = "HEALTHY"
@@ -7576,6 +7616,15 @@ const (
 	// HealthStatusUnknown is a HealthStatus enum value
 	HealthStatusUnknown = "UNKNOWN"
 )
+
+// HealthStatus_Values returns all elements of the HealthStatus enum
+func HealthStatus_Values() []string {
+	return []string{
+		HealthStatusHealthy,
+		HealthStatusUnhealthy,
+		HealthStatusUnknown,
+	}
+}
 
 const (
 	// HealthStatusFilterHealthy is a HealthStatusFilter enum value
@@ -7588,10 +7637,26 @@ const (
 	HealthStatusFilterAll = "ALL"
 )
 
+// HealthStatusFilter_Values returns all elements of the HealthStatusFilter enum
+func HealthStatusFilter_Values() []string {
+	return []string{
+		HealthStatusFilterHealthy,
+		HealthStatusFilterUnhealthy,
+		HealthStatusFilterAll,
+	}
+}
+
 const (
 	// NamespaceFilterNameType is a NamespaceFilterName enum value
 	NamespaceFilterNameType = "TYPE"
 )
+
+// NamespaceFilterName_Values returns all elements of the NamespaceFilterName enum
+func NamespaceFilterName_Values() []string {
+	return []string{
+		NamespaceFilterNameType,
+	}
+}
 
 const (
 	// NamespaceTypeDnsPublic is a NamespaceType enum value
@@ -7603,6 +7668,15 @@ const (
 	// NamespaceTypeHttp is a NamespaceType enum value
 	NamespaceTypeHttp = "HTTP"
 )
+
+// NamespaceType_Values returns all elements of the NamespaceType enum
+func NamespaceType_Values() []string {
+	return []string{
+		NamespaceTypeDnsPublic,
+		NamespaceTypeDnsPrivate,
+		NamespaceTypeHttp,
+	}
+}
 
 const (
 	// OperationFilterNameNamespaceId is a OperationFilterName enum value
@@ -7621,6 +7695,17 @@ const (
 	OperationFilterNameUpdateDate = "UPDATE_DATE"
 )
 
+// OperationFilterName_Values returns all elements of the OperationFilterName enum
+func OperationFilterName_Values() []string {
+	return []string{
+		OperationFilterNameNamespaceId,
+		OperationFilterNameServiceId,
+		OperationFilterNameStatus,
+		OperationFilterNameType,
+		OperationFilterNameUpdateDate,
+	}
+}
+
 const (
 	// OperationStatusSubmitted is a OperationStatus enum value
 	OperationStatusSubmitted = "SUBMITTED"
@@ -7635,6 +7720,16 @@ const (
 	OperationStatusFail = "FAIL"
 )
 
+// OperationStatus_Values returns all elements of the OperationStatus enum
+func OperationStatus_Values() []string {
+	return []string{
+		OperationStatusSubmitted,
+		OperationStatusPending,
+		OperationStatusSuccess,
+		OperationStatusFail,
+	}
+}
+
 const (
 	// OperationTargetTypeNamespace is a OperationTargetType enum value
 	OperationTargetTypeNamespace = "NAMESPACE"
@@ -7645,6 +7740,15 @@ const (
 	// OperationTargetTypeInstance is a OperationTargetType enum value
 	OperationTargetTypeInstance = "INSTANCE"
 )
+
+// OperationTargetType_Values returns all elements of the OperationTargetType enum
+func OperationTargetType_Values() []string {
+	return []string{
+		OperationTargetTypeNamespace,
+		OperationTargetTypeService,
+		OperationTargetTypeInstance,
+	}
+}
 
 const (
 	// OperationTypeCreateNamespace is a OperationType enum value
@@ -7663,6 +7767,17 @@ const (
 	OperationTypeDeregisterInstance = "DEREGISTER_INSTANCE"
 )
 
+// OperationType_Values returns all elements of the OperationType enum
+func OperationType_Values() []string {
+	return []string{
+		OperationTypeCreateNamespace,
+		OperationTypeDeleteNamespace,
+		OperationTypeUpdateService,
+		OperationTypeRegisterInstance,
+		OperationTypeDeregisterInstance,
+	}
+}
+
 const (
 	// RecordTypeSrv is a RecordType enum value
 	RecordTypeSrv = "SRV"
@@ -7677,6 +7792,16 @@ const (
 	RecordTypeCname = "CNAME"
 )
 
+// RecordType_Values returns all elements of the RecordType enum
+func RecordType_Values() []string {
+	return []string{
+		RecordTypeSrv,
+		RecordTypeA,
+		RecordTypeAaaa,
+		RecordTypeCname,
+	}
+}
+
 const (
 	// RoutingPolicyMultivalue is a RoutingPolicy enum value
 	RoutingPolicyMultivalue = "MULTIVALUE"
@@ -7685,7 +7810,22 @@ const (
 	RoutingPolicyWeighted = "WEIGHTED"
 )
 
+// RoutingPolicy_Values returns all elements of the RoutingPolicy enum
+func RoutingPolicy_Values() []string {
+	return []string{
+		RoutingPolicyMultivalue,
+		RoutingPolicyWeighted,
+	}
+}
+
 const (
 	// ServiceFilterNameNamespaceId is a ServiceFilterName enum value
 	ServiceFilterNameNamespaceId = "NAMESPACE_ID"
 )
+
+// ServiceFilterName_Values returns all elements of the ServiceFilterName enum
+func ServiceFilterName_Values() []string {
+	return []string{
+		ServiceFilterNameNamespaceId,
+	}
+}

@@ -5844,7 +5844,7 @@ func (s ArchiveFindingsOutput) GoString() string {
 	return s.String()
 }
 
-// Contains information about the API operation.
+// Contains information about the API action.
 type AwsApiCallAction struct {
 	_ struct{} `type:"structure"`
 
@@ -5857,7 +5857,10 @@ type AwsApiCallAction struct {
 	// The domain information for the AWS API call.
 	DomainDetails *DomainDetails `locationName:"domainDetails" type:"structure"`
 
-	// The remote IP information of the connection.
+	// The error code of the failed AWS API action.
+	ErrorCode *string `locationName:"errorCode" type:"string"`
+
+	// The remote IP information of the connection that initiated the AWS API call.
 	RemoteIpDetails *RemoteIpDetails `locationName:"remoteIpDetails" type:"structure"`
 
 	// The AWS service name whose API was invoked.
@@ -5889,6 +5892,12 @@ func (s *AwsApiCallAction) SetCallerType(v string) *AwsApiCallAction {
 // SetDomainDetails sets the DomainDetails field's value.
 func (s *AwsApiCallAction) SetDomainDetails(v *DomainDetails) *AwsApiCallAction {
 	s.DomainDetails = v
+	return s
+}
+
+// SetErrorCode sets the ErrorCode field's value.
+func (s *AwsApiCallAction) SetErrorCode(v string) *AwsApiCallAction {
+	s.ErrorCode = &v
 	return s
 }
 
@@ -7466,7 +7475,7 @@ func (s *DeclineInvitationsOutput) SetUnprocessedAccounts(v []*UnprocessedAccoun
 }
 
 // Contains information on the server side encryption method used in the S3
-// bucket. See S3 Server-Side Encryption (https://docs.aws.amazon.com/AmazonS3/atest/dev/serv-side-encryption.html)
+// bucket. See S3 Server-Side Encryption (https://docs.aws.amazon.com/AmazonS3/latest/dev/serv-side-encryption.html)
 // for more information.
 type DefaultServerSideEncryption struct {
 	_ struct{} `type:"structure"`
@@ -14299,6 +14308,14 @@ const (
 	AdminStatusDisableInProgress = "DISABLE_IN_PROGRESS"
 )
 
+// AdminStatus_Values returns all elements of the AdminStatus enum
+func AdminStatus_Values() []string {
+	return []string{
+		AdminStatusEnabled,
+		AdminStatusDisableInProgress,
+	}
+}
+
 const (
 	// DataSourceFlowLogs is a DataSource enum value
 	DataSourceFlowLogs = "FLOW_LOGS"
@@ -14313,6 +14330,16 @@ const (
 	DataSourceS3Logs = "S3_LOGS"
 )
 
+// DataSource_Values returns all elements of the DataSource enum
+func DataSource_Values() []string {
+	return []string{
+		DataSourceFlowLogs,
+		DataSourceCloudTrail,
+		DataSourceDnsLogs,
+		DataSourceS3Logs,
+	}
+}
+
 const (
 	// DataSourceStatusEnabled is a DataSourceStatus enum value
 	DataSourceStatusEnabled = "ENABLED"
@@ -14321,10 +14348,25 @@ const (
 	DataSourceStatusDisabled = "DISABLED"
 )
 
+// DataSourceStatus_Values returns all elements of the DataSourceStatus enum
+func DataSourceStatus_Values() []string {
+	return []string{
+		DataSourceStatusEnabled,
+		DataSourceStatusDisabled,
+	}
+}
+
 const (
 	// DestinationTypeS3 is a DestinationType enum value
 	DestinationTypeS3 = "S3"
 )
+
+// DestinationType_Values returns all elements of the DestinationType enum
+func DestinationType_Values() []string {
+	return []string{
+		DestinationTypeS3,
+	}
+}
 
 const (
 	// DetectorStatusEnabled is a DetectorStatus enum value
@@ -14334,6 +14376,14 @@ const (
 	DetectorStatusDisabled = "DISABLED"
 )
 
+// DetectorStatus_Values returns all elements of the DetectorStatus enum
+func DetectorStatus_Values() []string {
+	return []string{
+		DetectorStatusEnabled,
+		DetectorStatusDisabled,
+	}
+}
+
 const (
 	// FeedbackUseful is a Feedback enum value
 	FeedbackUseful = "USEFUL"
@@ -14342,6 +14392,14 @@ const (
 	FeedbackNotUseful = "NOT_USEFUL"
 )
 
+// Feedback_Values returns all elements of the Feedback enum
+func Feedback_Values() []string {
+	return []string{
+		FeedbackUseful,
+		FeedbackNotUseful,
+	}
+}
+
 const (
 	// FilterActionNoop is a FilterAction enum value
 	FilterActionNoop = "NOOP"
@@ -14349,6 +14407,14 @@ const (
 	// FilterActionArchive is a FilterAction enum value
 	FilterActionArchive = "ARCHIVE"
 )
+
+// FilterAction_Values returns all elements of the FilterAction enum
+func FilterAction_Values() []string {
+	return []string{
+		FilterActionNoop,
+		FilterActionArchive,
+	}
+}
 
 const (
 	// FindingPublishingFrequencyFifteenMinutes is a FindingPublishingFrequency enum value
@@ -14361,10 +14427,26 @@ const (
 	FindingPublishingFrequencySixHours = "SIX_HOURS"
 )
 
+// FindingPublishingFrequency_Values returns all elements of the FindingPublishingFrequency enum
+func FindingPublishingFrequency_Values() []string {
+	return []string{
+		FindingPublishingFrequencyFifteenMinutes,
+		FindingPublishingFrequencyOneHour,
+		FindingPublishingFrequencySixHours,
+	}
+}
+
 const (
 	// FindingStatisticTypeCountBySeverity is a FindingStatisticType enum value
 	FindingStatisticTypeCountBySeverity = "COUNT_BY_SEVERITY"
 )
+
+// FindingStatisticType_Values returns all elements of the FindingStatisticType enum
+func FindingStatisticType_Values() []string {
+	return []string{
+		FindingStatisticTypeCountBySeverity,
+	}
+}
 
 const (
 	// IpSetFormatTxt is a IpSetFormat enum value
@@ -14385,6 +14467,18 @@ const (
 	// IpSetFormatFireEye is a IpSetFormat enum value
 	IpSetFormatFireEye = "FIRE_EYE"
 )
+
+// IpSetFormat_Values returns all elements of the IpSetFormat enum
+func IpSetFormat_Values() []string {
+	return []string{
+		IpSetFormatTxt,
+		IpSetFormatStix,
+		IpSetFormatOtxCsv,
+		IpSetFormatAlienVault,
+		IpSetFormatProofPoint,
+		IpSetFormatFireEye,
+	}
+}
 
 const (
 	// IpSetStatusInactive is a IpSetStatus enum value
@@ -14409,6 +14503,19 @@ const (
 	IpSetStatusDeleted = "DELETED"
 )
 
+// IpSetStatus_Values returns all elements of the IpSetStatus enum
+func IpSetStatus_Values() []string {
+	return []string{
+		IpSetStatusInactive,
+		IpSetStatusActivating,
+		IpSetStatusActive,
+		IpSetStatusDeactivating,
+		IpSetStatusError,
+		IpSetStatusDeletePending,
+		IpSetStatusDeleted,
+	}
+}
+
 const (
 	// OrderByAsc is a OrderBy enum value
 	OrderByAsc = "ASC"
@@ -14416,6 +14523,14 @@ const (
 	// OrderByDesc is a OrderBy enum value
 	OrderByDesc = "DESC"
 )
+
+// OrderBy_Values returns all elements of the OrderBy enum
+func OrderBy_Values() []string {
+	return []string{
+		OrderByAsc,
+		OrderByDesc,
+	}
+}
 
 const (
 	// PublishingStatusPendingVerification is a PublishingStatus enum value
@@ -14430,6 +14545,16 @@ const (
 	// PublishingStatusStopped is a PublishingStatus enum value
 	PublishingStatusStopped = "STOPPED"
 )
+
+// PublishingStatus_Values returns all elements of the PublishingStatus enum
+func PublishingStatus_Values() []string {
+	return []string{
+		PublishingStatusPendingVerification,
+		PublishingStatusPublishing,
+		PublishingStatusUnableToPublishFixDestinationProperty,
+		PublishingStatusStopped,
+	}
+}
 
 const (
 	// ThreatIntelSetFormatTxt is a ThreatIntelSetFormat enum value
@@ -14450,6 +14575,18 @@ const (
 	// ThreatIntelSetFormatFireEye is a ThreatIntelSetFormat enum value
 	ThreatIntelSetFormatFireEye = "FIRE_EYE"
 )
+
+// ThreatIntelSetFormat_Values returns all elements of the ThreatIntelSetFormat enum
+func ThreatIntelSetFormat_Values() []string {
+	return []string{
+		ThreatIntelSetFormatTxt,
+		ThreatIntelSetFormatStix,
+		ThreatIntelSetFormatOtxCsv,
+		ThreatIntelSetFormatAlienVault,
+		ThreatIntelSetFormatProofPoint,
+		ThreatIntelSetFormatFireEye,
+	}
+}
 
 const (
 	// ThreatIntelSetStatusInactive is a ThreatIntelSetStatus enum value
@@ -14474,6 +14611,19 @@ const (
 	ThreatIntelSetStatusDeleted = "DELETED"
 )
 
+// ThreatIntelSetStatus_Values returns all elements of the ThreatIntelSetStatus enum
+func ThreatIntelSetStatus_Values() []string {
+	return []string{
+		ThreatIntelSetStatusInactive,
+		ThreatIntelSetStatusActivating,
+		ThreatIntelSetStatusActive,
+		ThreatIntelSetStatusDeactivating,
+		ThreatIntelSetStatusError,
+		ThreatIntelSetStatusDeletePending,
+		ThreatIntelSetStatusDeleted,
+	}
+}
+
 const (
 	// UsageStatisticTypeSumByAccount is a UsageStatisticType enum value
 	UsageStatisticTypeSumByAccount = "SUM_BY_ACCOUNT"
@@ -14487,3 +14637,13 @@ const (
 	// UsageStatisticTypeTopResources is a UsageStatisticType enum value
 	UsageStatisticTypeTopResources = "TOP_RESOURCES"
 )
+
+// UsageStatisticType_Values returns all elements of the UsageStatisticType enum
+func UsageStatisticType_Values() []string {
+	return []string{
+		UsageStatisticTypeSumByAccount,
+		UsageStatisticTypeSumByDataSource,
+		UsageStatisticTypeSumByResource,
+		UsageStatisticTypeTopResources,
+	}
+}

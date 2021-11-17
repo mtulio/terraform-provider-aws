@@ -64,8 +64,8 @@ func (c *WAFV2) AssociateWebACLRequest(input *AssociateWebACLInput) (req *reques
 // the prior release, see the AWS WAF Developer Guide (https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html).
 //
 // Associates a Web ACL with a regional application resource, to protect the
-// resource. A regional application can be an Application Load Balancer (ALB)
-// or an API Gateway stage.
+// resource. A regional application can be an Application Load Balancer (ALB),
+// an API Gateway REST API, or an AppSync GraphQL API.
 //
 // For AWS CloudFront, don't use this call. Instead, use your CloudFront distribution
 // configuration. To associate a Web ACL, in the CloudFront call UpdateDistribution,
@@ -715,7 +715,8 @@ func (c *WAFV2) CreateWebACLRequest(input *CreateWebACLInput) (req *request.Requ
 // the rules. The rules in a Web ACL can be a combination of the types Rule,
 // RuleGroup, and managed rule group. You can associate a Web ACL with one or
 // more AWS resources to protect. The resources can be Amazon CloudFront, an
-// Amazon API Gateway API, or an Application Load Balancer.
+// Amazon API Gateway REST API, an Application Load Balancer, or an AWS AppSync
+// GraphQL API.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1799,7 +1800,8 @@ func (c *WAFV2) DisassociateWebACLRequest(input *DisassociateWebACLInput) (req *
 // the prior release, see the AWS WAF Developer Guide (https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html).
 //
 // Disassociates a Web ACL from a regional application resource. A regional
-// application can be an Application Load Balancer (ALB) or an API Gateway stage.
+// application can be an Application Load Balancer (ALB), an API Gateway REST
+// API, or an AppSync GraphQL API.
 //
 // For AWS CloudFront, don't use this call. Instead, use your CloudFront distribution
 // configuration. To disassociate a Web ACL, provide an empty web ACL ID in
@@ -4653,7 +4655,8 @@ func (c *WAFV2) UpdateWebACLRequest(input *UpdateWebACLInput) (req *request.Requ
 // the rules. The rules in a Web ACL can be a combination of the types Rule,
 // RuleGroup, and managed rule group. You can associate a Web ACL with one or
 // more AWS resources to protect. The resources can be Amazon CloudFront, an
-// Amazon API Gateway API, or an Application Load Balancer.
+// Amazon API Gateway REST API, an Application Load Balancer, or an AWS AppSync
+// GraphQL API.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -4838,7 +4841,9 @@ type AssociateWebACLInput struct {
 	//
 	//    * For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id
 	//
-	//    * For an Amazon API Gateway stage: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name
+	//    * For an API Gateway REST API: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name
+	//
+	//    * For an AppSync GraphQL API: arn:aws:appsync:region:account-id:apis/GraphQLApiId
 	//
 	// ResourceArn is a required field
 	ResourceArn *string `min:"20" type:"string" required:"true"`
@@ -5143,8 +5148,8 @@ type CheckCapacityInput struct {
 	Rules []*Rule `type:"list" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -5296,8 +5301,8 @@ type CreateIPSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -5445,8 +5450,8 @@ type CreateRegexPatternSetInput struct {
 	RegularExpressionList []*Regex `type:"list" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -5615,8 +5620,8 @@ type CreateRuleGroupInput struct {
 	Rules []*Rule `type:"list"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -5800,8 +5805,8 @@ type CreateWebACLInput struct {
 	Rules []*Rule `type:"list"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6119,8 +6124,8 @@ type DeleteIPSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6354,8 +6359,8 @@ type DeleteRegexPatternSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6477,8 +6482,8 @@ type DeleteRuleGroupInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6600,8 +6605,8 @@ type DeleteWebACLInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6704,8 +6709,8 @@ type DescribeManagedRuleGroupInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -6824,7 +6829,9 @@ type DisassociateWebACLInput struct {
 	//
 	//    * For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id
 	//
-	//    * For an Amazon API Gateway stage: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name
+	//    * For an API Gateway REST API: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name
+	//
+	//    * For an AppSync GraphQL API: arn:aws:appsync:region:account-id:apis/GraphQLApiId
 	//
 	// ResourceArn is a required field
 	ResourceArn *string `min:"20" type:"string" required:"true"`
@@ -7365,8 +7372,8 @@ type GetIPSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -7622,8 +7629,8 @@ type GetRateBasedStatementManagedKeysInput struct {
 	RuleName *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -7762,8 +7769,8 @@ type GetRegexPatternSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -7894,8 +7901,8 @@ type GetRuleGroupInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -8028,8 +8035,8 @@ type GetSampledRequestsInput struct {
 	RuleMetricName *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -8267,8 +8274,8 @@ type GetWebACLInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -8893,8 +8900,8 @@ type ListAvailableManagedRuleGroupsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -9004,8 +9011,8 @@ type ListIPSetsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -9117,8 +9124,8 @@ type ListLoggingConfigurationsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -9223,8 +9230,8 @@ type ListRegexPatternSetsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -9323,7 +9330,8 @@ type ListResourcesForWebACLInput struct {
 	_ struct{} `type:"structure"`
 
 	// Used for web ACLs that are scoped for regional applications. A regional application
-	// can be an Application Load Balancer (ALB) or an API Gateway stage.
+	// can be an Application Load Balancer (ALB), an API Gateway REST API, or an
+	// AppSync GraphQL API.
 	ResourceType *string `type:"string" enum:"ResourceType"`
 
 	// The Amazon Resource Name (ARN) of the Web ACL.
@@ -9408,8 +9416,8 @@ type ListRuleGroupsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -9624,8 +9632,8 @@ type ListWebACLsInput struct {
 	NextMarker *string `min:"1" type:"string"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -12587,8 +12595,8 @@ type UpdateIPSetInput struct {
 	Name *string `min:"1" type:"string" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -12743,8 +12751,8 @@ type UpdateRegexPatternSetInput struct {
 	RegularExpressionList []*Regex `type:"list" required:"true"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -12914,8 +12922,8 @@ type UpdateRuleGroupInput struct {
 	Rules []*Rule `type:"list"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -13106,8 +13114,8 @@ type UpdateWebACLInput struct {
 	Rules []*Rule `type:"list"`
 
 	// Specifies whether this is for an AWS CloudFront distribution or for a regional
-	// application. A regional application can be an Application Load Balancer (ALB)
-	// or an API Gateway stage.
+	// application. A regional application can be an Application Load Balancer (ALB),
+	// an API Gateway REST API, or an AppSync GraphQL API.
 	//
 	// To work with CloudFront, you must also specify the Region US East (N. Virginia)
 	// as follows:
@@ -14272,7 +14280,8 @@ func (s *WAFUnavailableEntityException) RequestID() string {
 // the rules. The rules in a Web ACL can be a combination of the types Rule,
 // RuleGroup, and managed rule group. You can associate a Web ACL with one or
 // more AWS resources to protect. The resources can be Amazon CloudFront, an
-// Amazon API Gateway API, or an Application Load Balancer.
+// Amazon API Gateway REST API, an Application Load Balancer, or an AWS AppSync
+// GraphQL API.
 type WebACL struct {
 	_ struct{} `type:"structure"`
 
@@ -14614,6 +14623,18 @@ const (
 	// ComparisonOperatorGt is a ComparisonOperator enum value
 	ComparisonOperatorGt = "GT"
 )
+
+// ComparisonOperator_Values returns all elements of the ComparisonOperator enum
+func ComparisonOperator_Values() []string {
+	return []string{
+		ComparisonOperatorEq,
+		ComparisonOperatorNe,
+		ComparisonOperatorLe,
+		ComparisonOperatorLt,
+		ComparisonOperatorGe,
+		ComparisonOperatorGt,
+	}
+}
 
 const (
 	// CountryCodeAf is a CountryCode enum value
@@ -15364,6 +15385,261 @@ const (
 	CountryCodeZw = "ZW"
 )
 
+// CountryCode_Values returns all elements of the CountryCode enum
+func CountryCode_Values() []string {
+	return []string{
+		CountryCodeAf,
+		CountryCodeAx,
+		CountryCodeAl,
+		CountryCodeDz,
+		CountryCodeAs,
+		CountryCodeAd,
+		CountryCodeAo,
+		CountryCodeAi,
+		CountryCodeAq,
+		CountryCodeAg,
+		CountryCodeAr,
+		CountryCodeAm,
+		CountryCodeAw,
+		CountryCodeAu,
+		CountryCodeAt,
+		CountryCodeAz,
+		CountryCodeBs,
+		CountryCodeBh,
+		CountryCodeBd,
+		CountryCodeBb,
+		CountryCodeBy,
+		CountryCodeBe,
+		CountryCodeBz,
+		CountryCodeBj,
+		CountryCodeBm,
+		CountryCodeBt,
+		CountryCodeBo,
+		CountryCodeBq,
+		CountryCodeBa,
+		CountryCodeBw,
+		CountryCodeBv,
+		CountryCodeBr,
+		CountryCodeIo,
+		CountryCodeBn,
+		CountryCodeBg,
+		CountryCodeBf,
+		CountryCodeBi,
+		CountryCodeKh,
+		CountryCodeCm,
+		CountryCodeCa,
+		CountryCodeCv,
+		CountryCodeKy,
+		CountryCodeCf,
+		CountryCodeTd,
+		CountryCodeCl,
+		CountryCodeCn,
+		CountryCodeCx,
+		CountryCodeCc,
+		CountryCodeCo,
+		CountryCodeKm,
+		CountryCodeCg,
+		CountryCodeCd,
+		CountryCodeCk,
+		CountryCodeCr,
+		CountryCodeCi,
+		CountryCodeHr,
+		CountryCodeCu,
+		CountryCodeCw,
+		CountryCodeCy,
+		CountryCodeCz,
+		CountryCodeDk,
+		CountryCodeDj,
+		CountryCodeDm,
+		CountryCodeDo,
+		CountryCodeEc,
+		CountryCodeEg,
+		CountryCodeSv,
+		CountryCodeGq,
+		CountryCodeEr,
+		CountryCodeEe,
+		CountryCodeEt,
+		CountryCodeFk,
+		CountryCodeFo,
+		CountryCodeFj,
+		CountryCodeFi,
+		CountryCodeFr,
+		CountryCodeGf,
+		CountryCodePf,
+		CountryCodeTf,
+		CountryCodeGa,
+		CountryCodeGm,
+		CountryCodeGe,
+		CountryCodeDe,
+		CountryCodeGh,
+		CountryCodeGi,
+		CountryCodeGr,
+		CountryCodeGl,
+		CountryCodeGd,
+		CountryCodeGp,
+		CountryCodeGu,
+		CountryCodeGt,
+		CountryCodeGg,
+		CountryCodeGn,
+		CountryCodeGw,
+		CountryCodeGy,
+		CountryCodeHt,
+		CountryCodeHm,
+		CountryCodeVa,
+		CountryCodeHn,
+		CountryCodeHk,
+		CountryCodeHu,
+		CountryCodeIs,
+		CountryCodeIn,
+		CountryCodeId,
+		CountryCodeIr,
+		CountryCodeIq,
+		CountryCodeIe,
+		CountryCodeIm,
+		CountryCodeIl,
+		CountryCodeIt,
+		CountryCodeJm,
+		CountryCodeJp,
+		CountryCodeJe,
+		CountryCodeJo,
+		CountryCodeKz,
+		CountryCodeKe,
+		CountryCodeKi,
+		CountryCodeKp,
+		CountryCodeKr,
+		CountryCodeKw,
+		CountryCodeKg,
+		CountryCodeLa,
+		CountryCodeLv,
+		CountryCodeLb,
+		CountryCodeLs,
+		CountryCodeLr,
+		CountryCodeLy,
+		CountryCodeLi,
+		CountryCodeLt,
+		CountryCodeLu,
+		CountryCodeMo,
+		CountryCodeMk,
+		CountryCodeMg,
+		CountryCodeMw,
+		CountryCodeMy,
+		CountryCodeMv,
+		CountryCodeMl,
+		CountryCodeMt,
+		CountryCodeMh,
+		CountryCodeMq,
+		CountryCodeMr,
+		CountryCodeMu,
+		CountryCodeYt,
+		CountryCodeMx,
+		CountryCodeFm,
+		CountryCodeMd,
+		CountryCodeMc,
+		CountryCodeMn,
+		CountryCodeMe,
+		CountryCodeMs,
+		CountryCodeMa,
+		CountryCodeMz,
+		CountryCodeMm,
+		CountryCodeNa,
+		CountryCodeNr,
+		CountryCodeNp,
+		CountryCodeNl,
+		CountryCodeNc,
+		CountryCodeNz,
+		CountryCodeNi,
+		CountryCodeNe,
+		CountryCodeNg,
+		CountryCodeNu,
+		CountryCodeNf,
+		CountryCodeMp,
+		CountryCodeNo,
+		CountryCodeOm,
+		CountryCodePk,
+		CountryCodePw,
+		CountryCodePs,
+		CountryCodePa,
+		CountryCodePg,
+		CountryCodePy,
+		CountryCodePe,
+		CountryCodePh,
+		CountryCodePn,
+		CountryCodePl,
+		CountryCodePt,
+		CountryCodePr,
+		CountryCodeQa,
+		CountryCodeRe,
+		CountryCodeRo,
+		CountryCodeRu,
+		CountryCodeRw,
+		CountryCodeBl,
+		CountryCodeSh,
+		CountryCodeKn,
+		CountryCodeLc,
+		CountryCodeMf,
+		CountryCodePm,
+		CountryCodeVc,
+		CountryCodeWs,
+		CountryCodeSm,
+		CountryCodeSt,
+		CountryCodeSa,
+		CountryCodeSn,
+		CountryCodeRs,
+		CountryCodeSc,
+		CountryCodeSl,
+		CountryCodeSg,
+		CountryCodeSx,
+		CountryCodeSk,
+		CountryCodeSi,
+		CountryCodeSb,
+		CountryCodeSo,
+		CountryCodeZa,
+		CountryCodeGs,
+		CountryCodeSs,
+		CountryCodeEs,
+		CountryCodeLk,
+		CountryCodeSd,
+		CountryCodeSr,
+		CountryCodeSj,
+		CountryCodeSz,
+		CountryCodeSe,
+		CountryCodeCh,
+		CountryCodeSy,
+		CountryCodeTw,
+		CountryCodeTj,
+		CountryCodeTz,
+		CountryCodeTh,
+		CountryCodeTl,
+		CountryCodeTg,
+		CountryCodeTk,
+		CountryCodeTo,
+		CountryCodeTt,
+		CountryCodeTn,
+		CountryCodeTr,
+		CountryCodeTm,
+		CountryCodeTc,
+		CountryCodeTv,
+		CountryCodeUg,
+		CountryCodeUa,
+		CountryCodeAe,
+		CountryCodeGb,
+		CountryCodeUs,
+		CountryCodeUm,
+		CountryCodeUy,
+		CountryCodeUz,
+		CountryCodeVu,
+		CountryCodeVe,
+		CountryCodeVn,
+		CountryCodeVg,
+		CountryCodeVi,
+		CountryCodeWf,
+		CountryCodeEh,
+		CountryCodeYe,
+		CountryCodeZm,
+		CountryCodeZw,
+	}
+}
+
 const (
 	// FallbackBehaviorMatch is a FallbackBehavior enum value
 	FallbackBehaviorMatch = "MATCH"
@@ -15371,6 +15647,14 @@ const (
 	// FallbackBehaviorNoMatch is a FallbackBehavior enum value
 	FallbackBehaviorNoMatch = "NO_MATCH"
 )
+
+// FallbackBehavior_Values returns all elements of the FallbackBehavior enum
+func FallbackBehavior_Values() []string {
+	return []string{
+		FallbackBehaviorMatch,
+		FallbackBehaviorNoMatch,
+	}
+}
 
 const (
 	// ForwardedIPPositionFirst is a ForwardedIPPosition enum value
@@ -15383,6 +15667,15 @@ const (
 	ForwardedIPPositionAny = "ANY"
 )
 
+// ForwardedIPPosition_Values returns all elements of the ForwardedIPPosition enum
+func ForwardedIPPosition_Values() []string {
+	return []string{
+		ForwardedIPPositionFirst,
+		ForwardedIPPositionLast,
+		ForwardedIPPositionAny,
+	}
+}
+
 const (
 	// IPAddressVersionIpv4 is a IPAddressVersion enum value
 	IPAddressVersionIpv4 = "IPV4"
@@ -15390,6 +15683,14 @@ const (
 	// IPAddressVersionIpv6 is a IPAddressVersion enum value
 	IPAddressVersionIpv6 = "IPV6"
 )
+
+// IPAddressVersion_Values returns all elements of the IPAddressVersion enum
+func IPAddressVersion_Values() []string {
+	return []string{
+		IPAddressVersionIpv4,
+		IPAddressVersionIpv6,
+	}
+}
 
 const (
 	// ParameterExceptionFieldWebAcl is a ParameterExceptionField enum value
@@ -15522,6 +15823,55 @@ const (
 	ParameterExceptionFieldHeaderName = "HEADER_NAME"
 )
 
+// ParameterExceptionField_Values returns all elements of the ParameterExceptionField enum
+func ParameterExceptionField_Values() []string {
+	return []string{
+		ParameterExceptionFieldWebAcl,
+		ParameterExceptionFieldRuleGroup,
+		ParameterExceptionFieldRegexPatternSet,
+		ParameterExceptionFieldIpSet,
+		ParameterExceptionFieldManagedRuleSet,
+		ParameterExceptionFieldRule,
+		ParameterExceptionFieldExcludedRule,
+		ParameterExceptionFieldStatement,
+		ParameterExceptionFieldByteMatchStatement,
+		ParameterExceptionFieldSqliMatchStatement,
+		ParameterExceptionFieldXssMatchStatement,
+		ParameterExceptionFieldSizeConstraintStatement,
+		ParameterExceptionFieldGeoMatchStatement,
+		ParameterExceptionFieldRateBasedStatement,
+		ParameterExceptionFieldRuleGroupReferenceStatement,
+		ParameterExceptionFieldRegexPatternReferenceStatement,
+		ParameterExceptionFieldIpSetReferenceStatement,
+		ParameterExceptionFieldManagedRuleSetStatement,
+		ParameterExceptionFieldAndStatement,
+		ParameterExceptionFieldOrStatement,
+		ParameterExceptionFieldNotStatement,
+		ParameterExceptionFieldIpAddress,
+		ParameterExceptionFieldIpAddressVersion,
+		ParameterExceptionFieldFieldToMatch,
+		ParameterExceptionFieldTextTransformation,
+		ParameterExceptionFieldSingleQueryArgument,
+		ParameterExceptionFieldSingleHeader,
+		ParameterExceptionFieldDefaultAction,
+		ParameterExceptionFieldRuleAction,
+		ParameterExceptionFieldEntityLimit,
+		ParameterExceptionFieldOverrideAction,
+		ParameterExceptionFieldScopeValue,
+		ParameterExceptionFieldResourceArn,
+		ParameterExceptionFieldResourceType,
+		ParameterExceptionFieldTags,
+		ParameterExceptionFieldTagKeys,
+		ParameterExceptionFieldMetricName,
+		ParameterExceptionFieldFirewallManagerStatement,
+		ParameterExceptionFieldFallbackBehavior,
+		ParameterExceptionFieldPosition,
+		ParameterExceptionFieldForwardedIpConfig,
+		ParameterExceptionFieldIpSetForwardedIpConfig,
+		ParameterExceptionFieldHeaderName,
+	}
+}
+
 const (
 	// PositionalConstraintExactly is a PositionalConstraint enum value
 	PositionalConstraintExactly = "EXACTLY"
@@ -15539,6 +15889,17 @@ const (
 	PositionalConstraintContainsWord = "CONTAINS_WORD"
 )
 
+// PositionalConstraint_Values returns all elements of the PositionalConstraint enum
+func PositionalConstraint_Values() []string {
+	return []string{
+		PositionalConstraintExactly,
+		PositionalConstraintStartsWith,
+		PositionalConstraintEndsWith,
+		PositionalConstraintContains,
+		PositionalConstraintContainsWord,
+	}
+}
+
 const (
 	// RateBasedStatementAggregateKeyTypeIp is a RateBasedStatementAggregateKeyType enum value
 	RateBasedStatementAggregateKeyTypeIp = "IP"
@@ -15547,13 +15908,33 @@ const (
 	RateBasedStatementAggregateKeyTypeForwardedIp = "FORWARDED_IP"
 )
 
+// RateBasedStatementAggregateKeyType_Values returns all elements of the RateBasedStatementAggregateKeyType enum
+func RateBasedStatementAggregateKeyType_Values() []string {
+	return []string{
+		RateBasedStatementAggregateKeyTypeIp,
+		RateBasedStatementAggregateKeyTypeForwardedIp,
+	}
+}
+
 const (
 	// ResourceTypeApplicationLoadBalancer is a ResourceType enum value
 	ResourceTypeApplicationLoadBalancer = "APPLICATION_LOAD_BALANCER"
 
 	// ResourceTypeApiGateway is a ResourceType enum value
 	ResourceTypeApiGateway = "API_GATEWAY"
+
+	// ResourceTypeAppsync is a ResourceType enum value
+	ResourceTypeAppsync = "APPSYNC"
 )
+
+// ResourceType_Values returns all elements of the ResourceType enum
+func ResourceType_Values() []string {
+	return []string{
+		ResourceTypeApplicationLoadBalancer,
+		ResourceTypeApiGateway,
+		ResourceTypeAppsync,
+	}
+}
 
 const (
 	// ScopeCloudfront is a Scope enum value
@@ -15562,6 +15943,14 @@ const (
 	// ScopeRegional is a Scope enum value
 	ScopeRegional = "REGIONAL"
 )
+
+// Scope_Values returns all elements of the Scope enum
+func Scope_Values() []string {
+	return []string{
+		ScopeCloudfront,
+		ScopeRegional,
+	}
+}
 
 const (
 	// TextTransformationTypeNone is a TextTransformationType enum value
@@ -15582,3 +15971,15 @@ const (
 	// TextTransformationTypeUrlDecode is a TextTransformationType enum value
 	TextTransformationTypeUrlDecode = "URL_DECODE"
 )
+
+// TextTransformationType_Values returns all elements of the TextTransformationType enum
+func TextTransformationType_Values() []string {
+	return []string{
+		TextTransformationTypeNone,
+		TextTransformationTypeCompressWhiteSpace,
+		TextTransformationTypeHtmlEntityDecode,
+		TextTransformationTypeLowercase,
+		TextTransformationTypeCmdLine,
+		TextTransformationTypeUrlDecode,
+	}
+}

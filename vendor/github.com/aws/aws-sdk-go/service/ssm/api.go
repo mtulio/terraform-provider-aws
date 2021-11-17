@@ -1512,7 +1512,7 @@ func (c *SSM) DeleteInventoryRequest(input *DeleteInventoryInput) (req *request.
 
 // DeleteInventory API operation for Amazon Simple Systems Manager (SSM).
 //
-// Delete a custom inventory type, or the data associated with a custom Inventory
+// Delete a custom inventory type or the data associated with a custom Inventory
 // type. Deleting a custom inventory type is also referred to as deleting a
 // custom inventory schema.
 //
@@ -3707,8 +3707,7 @@ func (c *SSM) DescribeEffectivePatchesForPatchBaselineRequest(input *DescribeEff
 //
 //   * UnsupportedOperatingSystem
 //   The operating systems you specified is not supported, or the operation is
-//   not supported for the operating system. Valid operating systems include:
-//   Windows, AmazonLinux, RedhatEnterpriseLinux, and Ubuntu.
+//   not supported for the operating system.
 //
 //   * InternalServerError
 //   An error occurred on the server side.
@@ -6553,10 +6552,6 @@ func (c *SSM) DescribePatchPropertiesRequest(input *DescribePatchPropertiesInput
 // The following section lists the properties that can be used in filters for
 // each major operating system type:
 //
-// WINDOWS
-//
-// Valid properties: PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, MSRC_SEVERITY
-//
 // AMAZON_LINUX
 //
 // Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
@@ -6565,9 +6560,17 @@ func (c *SSM) DescribePatchPropertiesRequest(input *DescribePatchPropertiesInput
 //
 // Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
 //
-// UBUNTU
+// CENTOS
+//
+// Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
+//
+// DEBIAN
 //
 // Valid properties: PRODUCT, PRIORITY
+//
+// ORACLE_LINUX
+//
+// Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
 //
 // REDHAT_ENTERPRISE_LINUX
 //
@@ -6577,9 +6580,13 @@ func (c *SSM) DescribePatchPropertiesRequest(input *DescribePatchPropertiesInput
 //
 // Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
 //
-// CENTOS
+// UBUNTU
 //
-// Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
+// Valid properties: PRODUCT, PRIORITY
+//
+// WINDOWS
+//
+// Valid properties: PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, MSRC_SEVERITY
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -6942,8 +6949,14 @@ func (c *SSM) GetCalendarStateRequest(input *GetCalendarStateInput) (req *reques
 // of the calendar at a specific time, and returns the next time that the Change
 // Calendar state will transition. If you do not specify a time, GetCalendarState
 // assumes the current time. Change Calendar entries have two possible states:
-// OPEN or CLOSED. For more information about Systems Manager Change Calendar,
-// see AWS Systems Manager Change Calendar (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-change-calendar.html)
+// OPEN or CLOSED.
+//
+// If you specify more than one calendar in a request, the command returns the
+// status of OPEN only if all calendars in the request are open. If one or more
+// calendars in the request are closed, the status returned is CLOSED.
+//
+// For more information about Systems Manager Change Calendar, see AWS Systems
+// Manager Change Calendar (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-change-calendar.html)
 // in the AWS Systems Manager User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -7315,8 +7328,7 @@ func (c *SSM) GetDeployablePatchSnapshotForInstanceRequest(input *GetDeployableP
 //
 //   * UnsupportedOperatingSystem
 //   The operating systems you specified is not supported, or the operation is
-//   not supported for the operating system. Valid operating systems include:
-//   Windows, AmazonLinux, RedhatEnterpriseLinux, and Ubuntu.
+//   not supported for the operating system.
 //
 //   * UnsupportedFeatureRequiredException
 //   Microsoft application patching is only available on EC2 instances and advanced
@@ -8554,7 +8566,7 @@ func (c *SSM) GetParameterHistoryRequest(input *GetParameterHistoryInput) (req *
 
 // GetParameterHistory API operation for Amazon Simple Systems Manager (SSM).
 //
-// Query a list of all parameters used by the AWS account.
+// Retrieves the history of all changes to a parameter.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -11414,7 +11426,25 @@ func (c *SSM) PutParameterRequest(input *PutParameterInput) (req *request.Reques
 //   The request does not meet the regular expression requirement.
 //
 //   * ParameterMaxVersionLimitExceeded
-//   The parameter exceeded the maximum number of allowed versions.
+//   Parameter Store retains the 100 most recently created versions of a parameter.
+//   After this number of versions has been created, Parameter Store deletes the
+//   oldest version when a new one is created. However, if the oldest version
+//   has a label attached to it, Parameter Store will not delete the version and
+//   instead presents this error message:
+//
+//   An error occurred (ParameterMaxVersionLimitExceeded) when calling the PutParameter
+//   operation: You attempted to create a new version of parameter-name by calling
+//   the PutParameter API with the overwrite flag. Version version-number, the
+//   oldest version, can't be deleted because it has a label associated with it.
+//   Move the label to another version of the parameter, and try again.
+//
+//   This safeguard is to prevent parameter versions with mission critical labels
+//   assigned to them from being deleted. To continue creating new parameters,
+//   first move the label from the oldest version of the parameter to a newer
+//   one for use in your operations. For information about moving parameter labels,
+//   see Move a parameter label (console) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-console-move)
+//   or Move a parameter label (CLI) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-cli-move)
+//   in the AWS Systems Manager User Guide.
 //
 //   * ParameterPatternMismatchException
 //   The parameter name is not valid.
@@ -12621,7 +12651,9 @@ func (c *SSM) StartSessionRequest(input *StartSessionInput) (req *request.Reques
 //   The specified target instance for the session is not fully configured for
 //   use with Session Manager. For more information, see Getting started with
 //   Session Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
-//   in the AWS Systems Manager User Guide.
+//   in the AWS Systems Manager User Guide. This error is also returned if you
+//   attempt to start a session on an instance that is located in a different
+//   account or Region
 //
 //   * InternalServerError
 //   An error occurred on the server side.
@@ -13515,10 +13547,18 @@ func (c *SSM) UpdateMaintenanceWindowTaskRequest(input *UpdateMaintenanceWindowT
 //
 //    * MaxErrors
 //
-// If a parameter is null, then the corresponding field is not modified. Also,
-// if you set Replace to true, then all fields required by the RegisterTaskWithMaintenanceWindow
-// action are required for this request. Optional fields that aren't specified
-// are set to null.
+// If the value for a parameter in UpdateMaintenanceWindowTask is null, then
+// the corresponding field is not modified. If you set Replace to true, then
+// all fields required by the RegisterTaskWithMaintenanceWindow action are required
+// for this request. Optional fields that aren't specified are set to null.
+//
+// When you update a maintenance window task that has options specified in TaskInvocationParameters,
+// you must provide again all the TaskInvocationParameters values that you want
+// to retain. The values you do not specify again are removed. For example,
+// suppose that when you registered a Run Command task, you specified TaskInvocationParameters
+// values for Comment, NotificationConfig, and OutputS3BucketName. If you update
+// the maintenance window task and specify only a different OutputS3BucketName
+// value, the values for Comment and NotificationConfig are removed.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -15257,6 +15297,8 @@ type AssociationFilter struct {
 
 	// The name of the filter.
 	//
+	// InstanceId has been deprecated.
+	//
 	// Key is a required field
 	Key *string `locationName:"key" type:"string" required:"true" enum:"AssociationFilterKey"`
 
@@ -15832,10 +15874,10 @@ type AttachmentsSource struct {
 	// to a document. The format for Value depends on the type of key you specify.
 	//
 	//    * For the key SourceUrl, the value is an S3 bucket location. For example:
-	//    "Values": [ "s3://my-bucket/my-folder" ]
+	//    "Values": [ "s3://doc-example-bucket/my-folder" ]
 	//
 	//    * For the key S3FileUrl, the value is a file in an S3 bucket. For example:
-	//    "Values": [ "s3://my-bucket/my-folder/my-file.py" ]
+	//    "Values": [ "s3://doc-example-bucket/my-folder/my-file.py" ]
 	//
 	//    * For the key AttachmentReference, the value is constructed from the name
 	//    of another SSM document in your account, a version number of that document,
@@ -16256,7 +16298,7 @@ type AutomationExecutionFilter struct {
 
 	// One or more keys to limit the results. Valid filter keys include the following:
 	// DocumentNamePrefix, ExecutionStatus, ExecutionId, ParentExecutionId, CurrentAction,
-	// StartTimeBefore, StartTimeAfter.
+	// StartTimeBefore, StartTimeAfter, TargetResourceGroup.
 	//
 	// Key is a required field
 	Key *string `type:"string" required:"true" enum:"AutomationExecutionFilterKey"`
@@ -17477,13 +17519,13 @@ type CommandPlugin struct {
 	// This was requested when issuing the command. For example, in the following
 	// response:
 	//
-	// test_folder/ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix/i-1234567876543/awsrunShellScript
+	// doc-example-bucket/ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix/i-02573cafcfEXAMPLE/awsrunShellScript
 	//
-	// test_folder is the name of the S3 bucket;
+	// doc-example-bucket is the name of the S3 bucket;
 	//
 	// ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix is the name of the S3 prefix;
 	//
-	// i-1234567876543 is the instance ID;
+	// i-02573cafcfEXAMPLE is the instance ID;
 	//
 	// awsrunShellScript is the name of the plugin.
 	OutputS3BucketName *string `min:"3" type:"string"`
@@ -17492,13 +17534,13 @@ type CommandPlugin struct {
 	// executions should be stored. This was requested when issuing the command.
 	// For example, in the following response:
 	//
-	// test_folder/ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix/i-1234567876543/awsrunShellScript
+	// doc-example-bucket/ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix/i-02573cafcfEXAMPLE/awsrunShellScript
 	//
-	// test_folder is the name of the S3 bucket;
+	// doc-example-bucket is the name of the S3 bucket;
 	//
 	// ab19cb99-a030-46dd-9dfc-8eSAMPLEPre-Fix is the name of the S3 prefix;
 	//
-	// i-1234567876543 is the instance ID;
+	// i-02573cafcfEXAMPLE is the instance ID;
 	//
 	// awsrunShellScript is the name of the plugin.
 	OutputS3KeyPrefix *string `type:"string"`
@@ -17749,7 +17791,8 @@ type ComplianceItem struct {
 	// Critical, High, Medium, Low, Informational, Unspecified.
 	Severity *string `type:"string" enum:"ComplianceSeverity"`
 
-	// The status of the compliance item. An item is either COMPLIANT or NON_COMPLIANT.
+	// The status of the compliance item. An item is either COMPLIANT, NON_COMPLIANT,
+	// or an empty string (for Windows patches that aren't applicable).
 	Status *string `type:"string" enum:"ComplianceStatus"`
 
 	// A title for the compliance item. For example, if the compliance item is a
@@ -20140,7 +20183,7 @@ type DeleteInventoryInput struct {
 	_ struct{} `type:"structure"`
 
 	// User-provided idempotency token.
-	ClientToken *string `min:"1" type:"string" idempotencyToken:"true"`
+	ClientToken *string `type:"string" idempotencyToken:"true"`
 
 	// Use this option to view a summary of the deletion request without deleting
 	// any data or the data type. This option is useful when you only want to understand
@@ -20164,7 +20207,7 @@ type DeleteInventoryInput struct {
 	SchemaDeleteOption *string `type:"string" enum:"InventorySchemaDeleteOption"`
 
 	// The name of the custom inventory type for which you want to delete either
-	// all previously collected data, or the inventory type itself.
+	// all previously collected data or the inventory type itself.
 	//
 	// TypeName is a required field
 	TypeName *string `min:"1" type:"string" required:"true"`
@@ -20183,9 +20226,6 @@ func (s DeleteInventoryInput) GoString() string {
 // Validate inspects the fields of the type to determine if they are valid.
 func (s *DeleteInventoryInput) Validate() error {
 	invalidParams := request.ErrInvalidParams{Context: "DeleteInventoryInput"}
-	if s.ClientToken != nil && len(*s.ClientToken) < 1 {
-		invalidParams.Add(request.NewErrParamMinLen("ClientToken", 1))
-	}
 	if s.TypeName == nil {
 		invalidParams.Add(request.NewErrParamRequired("TypeName"))
 	}
@@ -25057,16 +25097,59 @@ func (s *DocumentIdentifier) SetVersionName(v string) *DocumentIdentifier {
 //
 // For keys, you can specify one or more tags that have been applied to a document.
 //
-// Other valid values include Owner, Name, PlatformTypes, DocumentType, and
-// TargetType.
+// You can also use AWS-provided keys, some of which have specific allowed values.
+// These keys and their associated values are as follows:
+//
+// DocumentType
+//
+//    * ApplicationConfiguration
+//
+//    * ApplicationConfigurationSchema
+//
+//    * Automation
+//
+//    * ChangeCalendar
+//
+//    * Command
+//
+//    * DeploymentStrategy
+//
+//    * Package
+//
+//    * Policy
+//
+//    * Session
+//
+// Owner
 //
 // Note that only one Owner can be specified in a request. For example: Key=Owner,Values=Self.
 //
-// If you use Name as a key, you can use a name prefix to return a list of documents.
-// For example, in the AWS CLI, to return a list of all documents that begin
-// with Te, run the following command:
+//    * Amazon
+//
+//    * Private
+//
+//    * Public
+//
+//    * Self
+//
+//    * ThirdParty
+//
+// PlatformTypes
+//
+//    * Linux
+//
+//    * Windows
+//
+// Name is another AWS-provided key. If you use Name as a key, you can use a
+// name prefix to return a list of documents. For example, in the AWS CLI, to
+// return a list of all documents that begin with Te, run the following command:
 //
 // aws ssm list-documents --filters Key=Name,Values=Te
+//
+// You can also use the TargetType AWS-provided key. For a list of valid resource
+// type values that can be used with this key, see AWS resource and property
+// types reference (http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
+// in the AWS CloudFormation User Guide.
 //
 // If you specify more than two keys, only documents that are identified by
 // all the tags are returned in the results. If you specify more than two values
@@ -25075,7 +25158,7 @@ func (s *DocumentIdentifier) SetVersionName(v string) *DocumentIdentifier {
 //
 // To specify a custom key and value pair, use the format Key=tag:tagName,Values=valueName.
 //
-// For example, if you created a Key called region and are using the AWS CLI
+// For example, if you created a key called region and are using the AWS CLI
 // to call the list-documents command:
 //
 // aws ssm list-documents --filters Key=tag:region,Values=east,west Key=Owner,Values=Self
@@ -28210,7 +28293,7 @@ type GetParameterHistoryInput struct {
 	// results.
 	MaxResults *int64 `min:"1" type:"integer"`
 
-	// The name of a parameter you want to query.
+	// The name of the parameter for which you want to review history.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -28396,6 +28479,12 @@ type GetParametersByPathInput struct {
 	NextToken *string `type:"string"`
 
 	// Filters to limit the request results.
+	//
+	// For GetParametersByPath, the following filter Key names are supported: Type,
+	// KeyId, Label, and DataType.
+	//
+	// The following Key values are not supported for GetParametersByPath: tag,
+	// Name, Path, and Tier.
 	ParameterFilters []*ParameterStringFilter `type:"list"`
 
 	// The hierarchy for the parameter. Hierarchies start with a forward slash (/)
@@ -29536,6 +29625,8 @@ type InstanceInformation struct {
 	Name *string `type:"string"`
 
 	// Connection status of SSM Agent.
+	//
+	// The status Inactive has been deprecated and is no longer in use.
 	PingStatus *string `type:"string" enum:"PingStatus"`
 
 	// The name of the operating system platform running on your instance.
@@ -29838,7 +29929,7 @@ type InstancePatchState struct {
 	// instance was rebooted.
 	InstalledPendingRebootCount *int64 `type:"integer"`
 
-	// The number of instances with patches installed that are specified in a RejectedPatches
+	// The number of patches installed on an instance that are specified in a RejectedPatches
 	// list. Patches with a status of InstalledRejected were typically installed
 	// before they were added to a RejectedPatches list.
 	//
@@ -33928,6 +34019,11 @@ type ListAssociationsInput struct {
 	_ struct{} `type:"structure"`
 
 	// One or more filters. Use a filter to return a more specific list of results.
+	//
+	// Filtering associations using the InstanceID attribute only returns legacy
+	// associations created using the InstanceID attribute. Associations targeting
+	// the instance that are part of the Target Attributes ResourceGroup or Tags
+	// are not returned.
 	AssociationFilterList []*AssociationFilter `min:"1" type:"list"`
 
 	// The maximum number of items to return for this call. The call also returns
@@ -35023,7 +35119,7 @@ type ListResourceDataSyncInput struct {
 	NextToken *string `type:"string"`
 
 	// View a list of resource data syncs according to the sync type. Specify SyncToDestination
-	// to view resource data syncs that synchronize data to an Amazon S3 buckets.
+	// to view resource data syncs that synchronize data to an Amazon S3 bucket.
 	// Specify SyncFromSource to view resource data syncs from AWS Organizations
 	// or from multiple AWS Regions.
 	SyncType *string `min:"1" type:"string"`
@@ -36712,7 +36808,7 @@ type OpsAggregator struct {
 	Aggregators []*OpsAggregator `min:"1" type:"list"`
 
 	// The name of an OpsItem attribute on which to limit the count of OpsItems.
-	AttributeName *string `type:"string"`
+	AttributeName *string `min:"1" type:"string"`
 
 	// The aggregator filters.
 	Filters []*OpsFilter `min:"1" type:"list"`
@@ -36742,6 +36838,9 @@ func (s *OpsAggregator) Validate() error {
 	}
 	if s.Aggregators != nil && len(s.Aggregators) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("Aggregators", 1))
+	}
+	if s.AttributeName != nil && len(*s.AttributeName) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("AttributeName", 1))
 	}
 	if s.Filters != nil && len(s.Filters) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("Filters", 1))
@@ -38105,7 +38204,25 @@ func (s *ParameterLimitExceeded) RequestID() string {
 	return s.RespMetadata.RequestID
 }
 
-// The parameter exceeded the maximum number of allowed versions.
+// Parameter Store retains the 100 most recently created versions of a parameter.
+// After this number of versions has been created, Parameter Store deletes the
+// oldest version when a new one is created. However, if the oldest version
+// has a label attached to it, Parameter Store will not delete the version and
+// instead presents this error message:
+//
+// An error occurred (ParameterMaxVersionLimitExceeded) when calling the PutParameter
+// operation: You attempted to create a new version of parameter-name by calling
+// the PutParameter API with the overwrite flag. Version version-number, the
+// oldest version, can't be deleted because it has a label associated with it.
+// Move the label to another version of the parameter, and try again.
+//
+// This safeguard is to prevent parameter versions with mission critical labels
+// assigned to them from being deleted. To continue creating new parameters,
+// first move the label from the oldest version of the parameter to a newer
+// one for use in your operations. For information about moving parameter labels,
+// see Move a parameter label (console) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-console-move)
+// or Move a parameter label (CLI) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-cli-move)
+// in the AWS Systems Manager User Guide.
 type ParameterMaxVersionLimitExceeded struct {
 	_            struct{}                  `type:"structure"`
 	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
@@ -38394,24 +38511,24 @@ func (s *ParameterPatternMismatchException) RequestID() string {
 }
 
 // One or more filters. Use a filter to return a more specific list of results.
-//
-// The ParameterStringFilter object is used by the DescribeParameters and GetParametersByPath
-// API actions. However, not all of the pattern values listed for Key can be
-// used with both actions.
-//
-// For DescribeActions, all of the listed patterns are valid, with the exception
-// of Label.
-//
-// For GetParametersByPath, the following patterns listed for Key are not valid:
-// Name, Path, and Tier.
-//
-// For examples of CLI commands demonstrating valid parameter filter constructions,
-// see Searching for Systems Manager parameters (https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-search.html)
-// in the AWS Systems Manager User Guide.
 type ParameterStringFilter struct {
 	_ struct{} `type:"structure"`
 
 	// The name of the filter.
+	//
+	// The ParameterStringFilter object is used by the DescribeParameters and GetParametersByPath
+	// API actions. However, not all of the pattern values listed for Key can be
+	// used with both actions.
+	//
+	// For DescribeActions, all of the listed patterns are valid, with the exception
+	// of Label.
+	//
+	// For GetParametersByPath, the following patterns listed for Key are not valid:
+	// tag, Name, Path, and Tier.
+	//
+	// For examples of CLI commands demonstrating valid parameter filter constructions,
+	// see Searching for Systems Manager parameters (https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-search.html)
+	// in the AWS Systems Manager User Guide.
 	//
 	// Key is a required field
 	Key *string `min:"1" type:"string" required:"true"`
@@ -38422,8 +38539,8 @@ type ParameterStringFilter struct {
 	// and OneLevel.)
 	//
 	// For filters used with GetParametersByPath, valid options include Equals and
-	// BeginsWith. (Exception: For filters using the key Label, the only valid option
-	// is Equals.)
+	// BeginsWith. (Exception: For filters using Label as the Key name, the only
+	// valid option is Equals.)
 	Option *string `min:"1" type:"string"`
 
 	// The value you want to search for.
@@ -38653,7 +38770,25 @@ func (s *ParametersFilter) SetValues(v []*string) *ParametersFilter {
 type Patch struct {
 	_ struct{} `type:"structure"`
 
-	// The classification of the patch (for example, SecurityUpdates, Updates, CriticalUpdates).
+	// The Advisory ID of the patch. For example, RHSA-2020:3779. Applies to Linux-based
+	// instances only.
+	AdvisoryIds []*string `type:"list"`
+
+	// The architecture of the patch. For example, in example-pkg-0.710.10-2.7.abcd.x86_64,
+	// the architecture is indicated by x86_64. Applies to Linux-based instances
+	// only.
+	Arch *string `type:"string"`
+
+	// The Bugzilla ID of the patch. For example, 1600646. Applies to Linux-based
+	// instances only.
+	BugzillaIds []*string `type:"list"`
+
+	// The Common Vulnerabilities and Exposures (CVE) ID of the patch. For example,
+	// CVE-1999-0067. Applies to Linux-based instances only.
+	CVEIds []*string `type:"list"`
+
+	// The classification of the patch. For example, SecurityUpdates, Updates, or
+	// CriticalUpdates.
 	Classification *string `type:"string"`
 
 	// The URL where more information can be obtained about the patch.
@@ -38662,36 +38797,65 @@ type Patch struct {
 	// The description of the patch.
 	Description *string `type:"string"`
 
-	// The ID of the patch (this is different than the Microsoft Knowledge Base
-	// ID).
+	// The epoch of the patch. For example in pkg-example-EE-20180914-2.2.amzn1.noarch,
+	// the epoch value is 20180914-2. Applies to Linux-based instances only.
+	Epoch *int64 `type:"integer"`
+
+	// The ID of the patch. Applies to Windows patches only.
+	//
+	// This ID is not the same as the Microsoft Knowledge Base ID.
 	Id *string `min:"1" type:"string"`
 
-	// The Microsoft Knowledge Base ID of the patch.
+	// The Microsoft Knowledge Base ID of the patch. Applies to Windows patches
+	// only.
 	KbNumber *string `type:"string"`
 
 	// The language of the patch if it's language-specific.
 	Language *string `type:"string"`
 
-	// The ID of the MSRC bulletin the patch is related to.
+	// The ID of the Microsoft Security Response Center (MSRC) bulletin the patch
+	// is related to. For example, MS14-045. Applies to Windows patches only.
 	MsrcNumber *string `type:"string"`
 
-	// The severity of the patch (for example Critical, Important, Moderate).
+	// The severity of the patch, such as Critical, Important, or Moderate. Applies
+	// to Windows patches only.
 	MsrcSeverity *string `type:"string"`
 
-	// The specific product the patch is applicable for (for example, WindowsServer2016).
+	// The name of the patch. Applies to Linux-based instances only.
+	Name *string `type:"string"`
+
+	// The specific product the patch is applicable for. For example, WindowsServer2016
+	// or AmazonLinux2018.03.
 	Product *string `type:"string"`
 
-	// The product family the patch is applicable for (for example, Windows).
+	// The product family the patch is applicable for. For example, Windows or Amazon
+	// Linux 2.
 	ProductFamily *string `type:"string"`
+
+	// The particular release of a patch. For example, in pkg-example-EE-20180914-2.2.amzn1.noarch,
+	// the release is 2.amaz1. Applies to Linux-based instances only.
+	Release *string `type:"string"`
 
 	// The date the patch was released.
 	ReleaseDate *time.Time `type:"timestamp"`
+
+	// The source patch repository for the operating system and version, such as
+	// trusty-security for Ubuntu Server 14.04 LTE and focal-security for Ubuntu
+	// Server 20.04 LTE. Applies to Linux-based instances only.
+	Repository *string `type:"string"`
+
+	// The severity level of the patch. For example, CRITICAL or MODERATE.
+	Severity *string `type:"string"`
 
 	// The title of the patch.
 	Title *string `type:"string"`
 
 	// The name of the vendor providing the patch.
 	Vendor *string `type:"string"`
+
+	// The version number of the patch. For example, in example-pkg-1.710.10-2.7.abcd.x86_64,
+	// the version number is indicated by -1. Applies to Linux-based instances only.
+	Version *string `type:"string"`
 }
 
 // String returns the string representation
@@ -38702,6 +38866,30 @@ func (s Patch) String() string {
 // GoString returns the string representation
 func (s Patch) GoString() string {
 	return s.String()
+}
+
+// SetAdvisoryIds sets the AdvisoryIds field's value.
+func (s *Patch) SetAdvisoryIds(v []*string) *Patch {
+	s.AdvisoryIds = v
+	return s
+}
+
+// SetArch sets the Arch field's value.
+func (s *Patch) SetArch(v string) *Patch {
+	s.Arch = &v
+	return s
+}
+
+// SetBugzillaIds sets the BugzillaIds field's value.
+func (s *Patch) SetBugzillaIds(v []*string) *Patch {
+	s.BugzillaIds = v
+	return s
+}
+
+// SetCVEIds sets the CVEIds field's value.
+func (s *Patch) SetCVEIds(v []*string) *Patch {
+	s.CVEIds = v
+	return s
 }
 
 // SetClassification sets the Classification field's value.
@@ -38719,6 +38907,12 @@ func (s *Patch) SetContentUrl(v string) *Patch {
 // SetDescription sets the Description field's value.
 func (s *Patch) SetDescription(v string) *Patch {
 	s.Description = &v
+	return s
+}
+
+// SetEpoch sets the Epoch field's value.
+func (s *Patch) SetEpoch(v int64) *Patch {
+	s.Epoch = &v
 	return s
 }
 
@@ -38752,6 +38946,12 @@ func (s *Patch) SetMsrcSeverity(v string) *Patch {
 	return s
 }
 
+// SetName sets the Name field's value.
+func (s *Patch) SetName(v string) *Patch {
+	s.Name = &v
+	return s
+}
+
 // SetProduct sets the Product field's value.
 func (s *Patch) SetProduct(v string) *Patch {
 	s.Product = &v
@@ -38764,9 +38964,27 @@ func (s *Patch) SetProductFamily(v string) *Patch {
 	return s
 }
 
+// SetRelease sets the Release field's value.
+func (s *Patch) SetRelease(v string) *Patch {
+	s.Release = &v
+	return s
+}
+
 // SetReleaseDate sets the ReleaseDate field's value.
 func (s *Patch) SetReleaseDate(v time.Time) *Patch {
 	s.ReleaseDate = &v
+	return s
+}
+
+// SetRepository sets the Repository field's value.
+func (s *Patch) SetRepository(v string) *Patch {
+	s.Repository = &v
+	return s
+}
+
+// SetSeverity sets the Severity field's value.
+func (s *Patch) SetSeverity(v string) *Patch {
+	s.Severity = &v
 	return s
 }
 
@@ -38779,6 +38997,12 @@ func (s *Patch) SetTitle(v string) *Patch {
 // SetVendor sets the Vendor field's value.
 func (s *Patch) SetVendor(v string) *Patch {
 	s.Vendor = &v
+	return s
+}
+
+// SetVersion sets the Version field's value.
+func (s *Patch) SetVersion(v string) *Patch {
+	s.Version = &v
 	return s
 }
 
@@ -38850,6 +39074,10 @@ func (s *PatchBaselineIdentity) SetOperatingSystem(v string) *PatchBaselineIdent
 type PatchComplianceData struct {
 	_ struct{} `type:"structure"`
 
+	// The IDs of one or more Common Vulnerabilities and Exposure (CVE) issues that
+	// are resolved by the patch.
+	CVEIds *string `type:"string"`
+
 	// The classification of the patch (for example, SecurityUpdates, Updates, CriticalUpdates).
 	//
 	// Classification is a required field
@@ -38893,6 +39121,12 @@ func (s PatchComplianceData) String() string {
 // GoString returns the string representation
 func (s PatchComplianceData) GoString() string {
 	return s.String()
+}
+
+// SetCVEIds sets the CVEIds field's value.
+func (s *PatchComplianceData) SetCVEIds(v string) *PatchComplianceData {
+	s.CVEIds = &v
+	return s
 }
 
 // SetClassification sets the Classification field's value.
@@ -39974,8 +40208,7 @@ type PutParameterInput struct {
 
 	// The type of parameter that you want to add to the system.
 	//
-	// SecureString is not currently supported for AWS CloudFormation templates
-	// or in the China Regions.
+	// SecureString is not currently supported for AWS CloudFormation templates.
 	//
 	// Items in a StringList must be separated by a comma (,). You can't use other
 	// punctuation or special character to escape items in the list. If you have
@@ -39987,6 +40220,9 @@ type PutParameterInput struct {
 
 	// The parameter value that you want to add to the system. Standard parameters
 	// have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB.
+	//
+	// Parameters can't be referenced or nested in the values of other parameters.
+	// You can't include {{}} or {{ssm:parameter-name}} in a parameter value.
 	//
 	// Value is a required field
 	Value *string `type:"string" required:"true"`
@@ -42952,6 +43188,8 @@ type SessionFilter struct {
 	//    with that status. Status values you can specify include: Connected Connecting
 	//    Disconnected Terminated Terminating Failed
 	//
+	//    * SessionId: Specify a session ID to return details about the session.
+	//
 	// Value is a required field
 	Value *string `locationName:"value" min:"1" type:"string" required:"true"`
 }
@@ -44283,7 +44521,9 @@ func (s *TargetLocation) SetTargetLocationMaxErrors(v string) *TargetLocation {
 // The specified target instance for the session is not fully configured for
 // use with Session Manager. For more information, see Getting started with
 // Session Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
-// in the AWS Systems Manager User Guide.
+// in the AWS Systems Manager User Guide. This error is also returned if you
+// attempt to start a session on an instance that is located in a different
+// account or Region
 type TargetNotConnected struct {
 	_            struct{}                  `type:"structure"`
 	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
@@ -44809,8 +45049,7 @@ func (s *UnsupportedInventorySchemaVersionException) RequestID() string {
 }
 
 // The operating systems you specified is not supported, or the operation is
-// not supported for the operating system. Valid operating systems include:
-// Windows, AmazonLinux, RedhatEnterpriseLinux, and Ubuntu.
+// not supported for the operating system.
 type UnsupportedOperatingSystem struct {
 	_            struct{}                  `type:"structure"`
 	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
@@ -46102,7 +46341,7 @@ type UpdateMaintenanceWindowTaskInput struct {
 	// Tasks that have the same priority are scheduled in parallel.
 	Priority *int64 `type:"integer"`
 
-	// If True, then all fields that are required by the RegisterTaskWithMaintenanceWndow
+	// If True, then all fields that are required by the RegisterTaskWithMaintenanceWindow
 	// action are also required for this API request. Optional fields that are not
 	// specified are set to null.
 	Replace *bool `type:"boolean"`
@@ -46131,6 +46370,14 @@ type UpdateMaintenanceWindowTaskInput struct {
 
 	// The parameters that the task should use during execution. Populate only the
 	// fields that match the task type. All other fields should be empty.
+	//
+	// When you update a maintenance window task that has options specified in TaskInvocationParameters,
+	// you must provide again all the TaskInvocationParameters values that you want
+	// to retain. The values you do not specify again are removed. For example,
+	// suppose that when you registered a Run Command task, you specified TaskInvocationParameters
+	// values for Comment, NotificationConfig, and OutputS3BucketName. If you update
+	// the maintenance window task and specify only a different OutputS3BucketName
+	// value, the values for Comment and NotificationConfig are removed.
 	TaskInvocationParameters *MaintenanceWindowTaskInvocationParameters `type:"structure"`
 
 	// The parameters to modify.
@@ -47253,6 +47500,17 @@ const (
 	AssociationComplianceSeverityUnspecified = "UNSPECIFIED"
 )
 
+// AssociationComplianceSeverity_Values returns all elements of the AssociationComplianceSeverity enum
+func AssociationComplianceSeverity_Values() []string {
+	return []string{
+		AssociationComplianceSeverityCritical,
+		AssociationComplianceSeverityHigh,
+		AssociationComplianceSeverityMedium,
+		AssociationComplianceSeverityLow,
+		AssociationComplianceSeverityUnspecified,
+	}
+}
+
 const (
 	// AssociationExecutionFilterKeyExecutionId is a AssociationExecutionFilterKey enum value
 	AssociationExecutionFilterKeyExecutionId = "ExecutionId"
@@ -47264,6 +47522,15 @@ const (
 	AssociationExecutionFilterKeyCreatedTime = "CreatedTime"
 )
 
+// AssociationExecutionFilterKey_Values returns all elements of the AssociationExecutionFilterKey enum
+func AssociationExecutionFilterKey_Values() []string {
+	return []string{
+		AssociationExecutionFilterKeyExecutionId,
+		AssociationExecutionFilterKeyStatus,
+		AssociationExecutionFilterKeyCreatedTime,
+	}
+}
+
 const (
 	// AssociationExecutionTargetsFilterKeyStatus is a AssociationExecutionTargetsFilterKey enum value
 	AssociationExecutionTargetsFilterKeyStatus = "Status"
@@ -47274,6 +47541,15 @@ const (
 	// AssociationExecutionTargetsFilterKeyResourceType is a AssociationExecutionTargetsFilterKey enum value
 	AssociationExecutionTargetsFilterKeyResourceType = "ResourceType"
 )
+
+// AssociationExecutionTargetsFilterKey_Values returns all elements of the AssociationExecutionTargetsFilterKey enum
+func AssociationExecutionTargetsFilterKey_Values() []string {
+	return []string{
+		AssociationExecutionTargetsFilterKeyStatus,
+		AssociationExecutionTargetsFilterKeyResourceId,
+		AssociationExecutionTargetsFilterKeyResourceType,
+	}
+}
 
 const (
 	// AssociationFilterKeyInstanceId is a AssociationFilterKey enum value
@@ -47301,6 +47577,20 @@ const (
 	AssociationFilterKeyResourceGroupName = "ResourceGroupName"
 )
 
+// AssociationFilterKey_Values returns all elements of the AssociationFilterKey enum
+func AssociationFilterKey_Values() []string {
+	return []string{
+		AssociationFilterKeyInstanceId,
+		AssociationFilterKeyName,
+		AssociationFilterKeyAssociationId,
+		AssociationFilterKeyAssociationStatusName,
+		AssociationFilterKeyLastExecutedBefore,
+		AssociationFilterKeyLastExecutedAfter,
+		AssociationFilterKeyAssociationName,
+		AssociationFilterKeyResourceGroupName,
+	}
+}
+
 const (
 	// AssociationFilterOperatorTypeEqual is a AssociationFilterOperatorType enum value
 	AssociationFilterOperatorTypeEqual = "EQUAL"
@@ -47311,6 +47601,15 @@ const (
 	// AssociationFilterOperatorTypeGreaterThan is a AssociationFilterOperatorType enum value
 	AssociationFilterOperatorTypeGreaterThan = "GREATER_THAN"
 )
+
+// AssociationFilterOperatorType_Values returns all elements of the AssociationFilterOperatorType enum
+func AssociationFilterOperatorType_Values() []string {
+	return []string{
+		AssociationFilterOperatorTypeEqual,
+		AssociationFilterOperatorTypeLessThan,
+		AssociationFilterOperatorTypeGreaterThan,
+	}
+}
 
 const (
 	// AssociationStatusNamePending is a AssociationStatusName enum value
@@ -47323,6 +47622,15 @@ const (
 	AssociationStatusNameFailed = "Failed"
 )
 
+// AssociationStatusName_Values returns all elements of the AssociationStatusName enum
+func AssociationStatusName_Values() []string {
+	return []string{
+		AssociationStatusNamePending,
+		AssociationStatusNameSuccess,
+		AssociationStatusNameFailed,
+	}
+}
+
 const (
 	// AssociationSyncComplianceAuto is a AssociationSyncCompliance enum value
 	AssociationSyncComplianceAuto = "AUTO"
@@ -47331,10 +47639,25 @@ const (
 	AssociationSyncComplianceManual = "MANUAL"
 )
 
+// AssociationSyncCompliance_Values returns all elements of the AssociationSyncCompliance enum
+func AssociationSyncCompliance_Values() []string {
+	return []string{
+		AssociationSyncComplianceAuto,
+		AssociationSyncComplianceManual,
+	}
+}
+
 const (
 	// AttachmentHashTypeSha256 is a AttachmentHashType enum value
 	AttachmentHashTypeSha256 = "Sha256"
 )
+
+// AttachmentHashType_Values returns all elements of the AttachmentHashType enum
+func AttachmentHashType_Values() []string {
+	return []string{
+		AttachmentHashTypeSha256,
+	}
+}
 
 const (
 	// AttachmentsSourceKeySourceUrl is a AttachmentsSourceKey enum value
@@ -47346,6 +47669,15 @@ const (
 	// AttachmentsSourceKeyAttachmentReference is a AttachmentsSourceKey enum value
 	AttachmentsSourceKeyAttachmentReference = "AttachmentReference"
 )
+
+// AttachmentsSourceKey_Values returns all elements of the AttachmentsSourceKey enum
+func AttachmentsSourceKey_Values() []string {
+	return []string{
+		AttachmentsSourceKeySourceUrl,
+		AttachmentsSourceKeyS3fileUrl,
+		AttachmentsSourceKeyAttachmentReference,
+	}
+}
 
 const (
 	// AutomationExecutionFilterKeyDocumentNamePrefix is a AutomationExecutionFilterKey enum value
@@ -47374,7 +47706,26 @@ const (
 
 	// AutomationExecutionFilterKeyTagKey is a AutomationExecutionFilterKey enum value
 	AutomationExecutionFilterKeyTagKey = "TagKey"
+
+	// AutomationExecutionFilterKeyTargetResourceGroup is a AutomationExecutionFilterKey enum value
+	AutomationExecutionFilterKeyTargetResourceGroup = "TargetResourceGroup"
 )
+
+// AutomationExecutionFilterKey_Values returns all elements of the AutomationExecutionFilterKey enum
+func AutomationExecutionFilterKey_Values() []string {
+	return []string{
+		AutomationExecutionFilterKeyDocumentNamePrefix,
+		AutomationExecutionFilterKeyExecutionStatus,
+		AutomationExecutionFilterKeyExecutionId,
+		AutomationExecutionFilterKeyParentExecutionId,
+		AutomationExecutionFilterKeyCurrentAction,
+		AutomationExecutionFilterKeyStartTimeBefore,
+		AutomationExecutionFilterKeyStartTimeAfter,
+		AutomationExecutionFilterKeyAutomationType,
+		AutomationExecutionFilterKeyTagKey,
+		AutomationExecutionFilterKeyTargetResourceGroup,
+	}
+}
 
 const (
 	// AutomationExecutionStatusPending is a AutomationExecutionStatus enum value
@@ -47402,6 +47753,20 @@ const (
 	AutomationExecutionStatusFailed = "Failed"
 )
 
+// AutomationExecutionStatus_Values returns all elements of the AutomationExecutionStatus enum
+func AutomationExecutionStatus_Values() []string {
+	return []string{
+		AutomationExecutionStatusPending,
+		AutomationExecutionStatusInProgress,
+		AutomationExecutionStatusWaiting,
+		AutomationExecutionStatusSuccess,
+		AutomationExecutionStatusTimedOut,
+		AutomationExecutionStatusCancelling,
+		AutomationExecutionStatusCancelled,
+		AutomationExecutionStatusFailed,
+	}
+}
+
 const (
 	// AutomationTypeCrossAccount is a AutomationType enum value
 	AutomationTypeCrossAccount = "CrossAccount"
@@ -47410,6 +47775,14 @@ const (
 	AutomationTypeLocal = "Local"
 )
 
+// AutomationType_Values returns all elements of the AutomationType enum
+func AutomationType_Values() []string {
+	return []string{
+		AutomationTypeCrossAccount,
+		AutomationTypeLocal,
+	}
+}
+
 const (
 	// CalendarStateOpen is a CalendarState enum value
 	CalendarStateOpen = "OPEN"
@@ -47417,6 +47790,14 @@ const (
 	// CalendarStateClosed is a CalendarState enum value
 	CalendarStateClosed = "CLOSED"
 )
+
+// CalendarState_Values returns all elements of the CalendarState enum
+func CalendarState_Values() []string {
+	return []string{
+		CalendarStateOpen,
+		CalendarStateClosed,
+	}
+}
 
 const (
 	// CommandFilterKeyInvokedAfter is a CommandFilterKey enum value
@@ -47434,6 +47815,17 @@ const (
 	// CommandFilterKeyDocumentName is a CommandFilterKey enum value
 	CommandFilterKeyDocumentName = "DocumentName"
 )
+
+// CommandFilterKey_Values returns all elements of the CommandFilterKey enum
+func CommandFilterKey_Values() []string {
+	return []string{
+		CommandFilterKeyInvokedAfter,
+		CommandFilterKeyInvokedBefore,
+		CommandFilterKeyStatus,
+		CommandFilterKeyExecutionStage,
+		CommandFilterKeyDocumentName,
+	}
+}
 
 const (
 	// CommandInvocationStatusPending is a CommandInvocationStatus enum value
@@ -47461,6 +47853,20 @@ const (
 	CommandInvocationStatusCancelling = "Cancelling"
 )
 
+// CommandInvocationStatus_Values returns all elements of the CommandInvocationStatus enum
+func CommandInvocationStatus_Values() []string {
+	return []string{
+		CommandInvocationStatusPending,
+		CommandInvocationStatusInProgress,
+		CommandInvocationStatusDelayed,
+		CommandInvocationStatusSuccess,
+		CommandInvocationStatusCancelled,
+		CommandInvocationStatusTimedOut,
+		CommandInvocationStatusFailed,
+		CommandInvocationStatusCancelling,
+	}
+}
+
 const (
 	// CommandPluginStatusPending is a CommandPluginStatus enum value
 	CommandPluginStatusPending = "Pending"
@@ -47480,6 +47886,18 @@ const (
 	// CommandPluginStatusFailed is a CommandPluginStatus enum value
 	CommandPluginStatusFailed = "Failed"
 )
+
+// CommandPluginStatus_Values returns all elements of the CommandPluginStatus enum
+func CommandPluginStatus_Values() []string {
+	return []string{
+		CommandPluginStatusPending,
+		CommandPluginStatusInProgress,
+		CommandPluginStatusSuccess,
+		CommandPluginStatusTimedOut,
+		CommandPluginStatusCancelled,
+		CommandPluginStatusFailed,
+	}
+}
 
 const (
 	// CommandStatusPending is a CommandStatus enum value
@@ -47504,6 +47922,19 @@ const (
 	CommandStatusCancelling = "Cancelling"
 )
 
+// CommandStatus_Values returns all elements of the CommandStatus enum
+func CommandStatus_Values() []string {
+	return []string{
+		CommandStatusPending,
+		CommandStatusInProgress,
+		CommandStatusSuccess,
+		CommandStatusCancelled,
+		CommandStatusFailed,
+		CommandStatusTimedOut,
+		CommandStatusCancelling,
+	}
+}
+
 const (
 	// ComplianceQueryOperatorTypeEqual is a ComplianceQueryOperatorType enum value
 	ComplianceQueryOperatorTypeEqual = "EQUAL"
@@ -47520,6 +47951,17 @@ const (
 	// ComplianceQueryOperatorTypeGreaterThan is a ComplianceQueryOperatorType enum value
 	ComplianceQueryOperatorTypeGreaterThan = "GREATER_THAN"
 )
+
+// ComplianceQueryOperatorType_Values returns all elements of the ComplianceQueryOperatorType enum
+func ComplianceQueryOperatorType_Values() []string {
+	return []string{
+		ComplianceQueryOperatorTypeEqual,
+		ComplianceQueryOperatorTypeNotEqual,
+		ComplianceQueryOperatorTypeBeginWith,
+		ComplianceQueryOperatorTypeLessThan,
+		ComplianceQueryOperatorTypeGreaterThan,
+	}
+}
 
 const (
 	// ComplianceSeverityCritical is a ComplianceSeverity enum value
@@ -47541,6 +47983,18 @@ const (
 	ComplianceSeverityUnspecified = "UNSPECIFIED"
 )
 
+// ComplianceSeverity_Values returns all elements of the ComplianceSeverity enum
+func ComplianceSeverity_Values() []string {
+	return []string{
+		ComplianceSeverityCritical,
+		ComplianceSeverityHigh,
+		ComplianceSeverityMedium,
+		ComplianceSeverityLow,
+		ComplianceSeverityInformational,
+		ComplianceSeverityUnspecified,
+	}
+}
+
 const (
 	// ComplianceStatusCompliant is a ComplianceStatus enum value
 	ComplianceStatusCompliant = "COMPLIANT"
@@ -47548,6 +48002,14 @@ const (
 	// ComplianceStatusNonCompliant is a ComplianceStatus enum value
 	ComplianceStatusNonCompliant = "NON_COMPLIANT"
 )
+
+// ComplianceStatus_Values returns all elements of the ComplianceStatus enum
+func ComplianceStatus_Values() []string {
+	return []string{
+		ComplianceStatusCompliant,
+		ComplianceStatusNonCompliant,
+	}
+}
 
 const (
 	// ComplianceUploadTypeComplete is a ComplianceUploadType enum value
@@ -47557,6 +48019,14 @@ const (
 	ComplianceUploadTypePartial = "PARTIAL"
 )
 
+// ComplianceUploadType_Values returns all elements of the ComplianceUploadType enum
+func ComplianceUploadType_Values() []string {
+	return []string{
+		ComplianceUploadTypeComplete,
+		ComplianceUploadTypePartial,
+	}
+}
+
 const (
 	// ConnectionStatusConnected is a ConnectionStatus enum value
 	ConnectionStatusConnected = "Connected"
@@ -47564,6 +48034,14 @@ const (
 	// ConnectionStatusNotConnected is a ConnectionStatus enum value
 	ConnectionStatusNotConnected = "NotConnected"
 )
+
+// ConnectionStatus_Values returns all elements of the ConnectionStatus enum
+func ConnectionStatus_Values() []string {
+	return []string{
+		ConnectionStatusConnected,
+		ConnectionStatusNotConnected,
+	}
+}
 
 const (
 	// DescribeActivationsFilterKeysActivationIds is a DescribeActivationsFilterKeys enum value
@@ -47575,6 +48053,15 @@ const (
 	// DescribeActivationsFilterKeysIamRole is a DescribeActivationsFilterKeys enum value
 	DescribeActivationsFilterKeysIamRole = "IamRole"
 )
+
+// DescribeActivationsFilterKeys_Values returns all elements of the DescribeActivationsFilterKeys enum
+func DescribeActivationsFilterKeys_Values() []string {
+	return []string{
+		DescribeActivationsFilterKeysActivationIds,
+		DescribeActivationsFilterKeysDefaultInstanceName,
+		DescribeActivationsFilterKeysIamRole,
+	}
+}
 
 const (
 	// DocumentFilterKeyName is a DocumentFilterKey enum value
@@ -47590,6 +48077,16 @@ const (
 	DocumentFilterKeyDocumentType = "DocumentType"
 )
 
+// DocumentFilterKey_Values returns all elements of the DocumentFilterKey enum
+func DocumentFilterKey_Values() []string {
+	return []string{
+		DocumentFilterKeyName,
+		DocumentFilterKeyOwner,
+		DocumentFilterKeyPlatformTypes,
+		DocumentFilterKeyDocumentType,
+	}
+}
+
 const (
 	// DocumentFormatYaml is a DocumentFormat enum value
 	DocumentFormatYaml = "YAML"
@@ -47601,6 +48098,15 @@ const (
 	DocumentFormatText = "TEXT"
 )
 
+// DocumentFormat_Values returns all elements of the DocumentFormat enum
+func DocumentFormat_Values() []string {
+	return []string{
+		DocumentFormatYaml,
+		DocumentFormatJson,
+		DocumentFormatText,
+	}
+}
+
 const (
 	// DocumentHashTypeSha256 is a DocumentHashType enum value
 	DocumentHashTypeSha256 = "Sha256"
@@ -47608,6 +48114,14 @@ const (
 	// DocumentHashTypeSha1 is a DocumentHashType enum value
 	DocumentHashTypeSha1 = "Sha1"
 )
+
+// DocumentHashType_Values returns all elements of the DocumentHashType enum
+func DocumentHashType_Values() []string {
+	return []string{
+		DocumentHashTypeSha256,
+		DocumentHashTypeSha1,
+	}
+}
 
 const (
 	// DocumentParameterTypeString is a DocumentParameterType enum value
@@ -47617,10 +48131,25 @@ const (
 	DocumentParameterTypeStringList = "StringList"
 )
 
+// DocumentParameterType_Values returns all elements of the DocumentParameterType enum
+func DocumentParameterType_Values() []string {
+	return []string{
+		DocumentParameterTypeString,
+		DocumentParameterTypeStringList,
+	}
+}
+
 const (
 	// DocumentPermissionTypeShare is a DocumentPermissionType enum value
 	DocumentPermissionTypeShare = "Share"
 )
+
+// DocumentPermissionType_Values returns all elements of the DocumentPermissionType enum
+func DocumentPermissionType_Values() []string {
+	return []string{
+		DocumentPermissionTypeShare,
+	}
+}
 
 // The status of a document.
 const (
@@ -47639,6 +48168,17 @@ const (
 	// DocumentStatusFailed is a DocumentStatus enum value
 	DocumentStatusFailed = "Failed"
 )
+
+// DocumentStatus_Values returns all elements of the DocumentStatus enum
+func DocumentStatus_Values() []string {
+	return []string{
+		DocumentStatusCreating,
+		DocumentStatusActive,
+		DocumentStatusUpdating,
+		DocumentStatusDeleting,
+		DocumentStatusFailed,
+	}
+}
 
 const (
 	// DocumentTypeCommand is a DocumentType enum value
@@ -47669,6 +48209,21 @@ const (
 	DocumentTypeChangeCalendar = "ChangeCalendar"
 )
 
+// DocumentType_Values returns all elements of the DocumentType enum
+func DocumentType_Values() []string {
+	return []string{
+		DocumentTypeCommand,
+		DocumentTypePolicy,
+		DocumentTypeAutomation,
+		DocumentTypeSession,
+		DocumentTypePackage,
+		DocumentTypeApplicationConfiguration,
+		DocumentTypeApplicationConfigurationSchema,
+		DocumentTypeDeploymentStrategy,
+		DocumentTypeChangeCalendar,
+	}
+}
+
 const (
 	// ExecutionModeAuto is a ExecutionMode enum value
 	ExecutionModeAuto = "Auto"
@@ -47676,6 +48231,14 @@ const (
 	// ExecutionModeInteractive is a ExecutionMode enum value
 	ExecutionModeInteractive = "Interactive"
 )
+
+// ExecutionMode_Values returns all elements of the ExecutionMode enum
+func ExecutionMode_Values() []string {
+	return []string{
+		ExecutionModeAuto,
+		ExecutionModeInteractive,
+	}
+}
 
 const (
 	// FaultClient is a Fault enum value
@@ -47687,6 +48250,15 @@ const (
 	// FaultUnknown is a Fault enum value
 	FaultUnknown = "Unknown"
 )
+
+// Fault_Values returns all elements of the Fault enum
+func Fault_Values() []string {
+	return []string{
+		FaultClient,
+		FaultServer,
+		FaultUnknown,
+	}
+}
 
 const (
 	// InstanceInformationFilterKeyInstanceIds is a InstanceInformationFilterKey enum value
@@ -47714,6 +48286,20 @@ const (
 	InstanceInformationFilterKeyAssociationStatus = "AssociationStatus"
 )
 
+// InstanceInformationFilterKey_Values returns all elements of the InstanceInformationFilterKey enum
+func InstanceInformationFilterKey_Values() []string {
+	return []string{
+		InstanceInformationFilterKeyInstanceIds,
+		InstanceInformationFilterKeyAgentVersion,
+		InstanceInformationFilterKeyPingStatus,
+		InstanceInformationFilterKeyPlatformTypes,
+		InstanceInformationFilterKeyActivationIds,
+		InstanceInformationFilterKeyIamRole,
+		InstanceInformationFilterKeyResourceType,
+		InstanceInformationFilterKeyAssociationStatus,
+	}
+}
+
 const (
 	// InstancePatchStateOperatorTypeEqual is a InstancePatchStateOperatorType enum value
 	InstancePatchStateOperatorTypeEqual = "Equal"
@@ -47728,6 +48314,16 @@ const (
 	InstancePatchStateOperatorTypeGreaterThan = "GreaterThan"
 )
 
+// InstancePatchStateOperatorType_Values returns all elements of the InstancePatchStateOperatorType enum
+func InstancePatchStateOperatorType_Values() []string {
+	return []string{
+		InstancePatchStateOperatorTypeEqual,
+		InstancePatchStateOperatorTypeNotEqual,
+		InstancePatchStateOperatorTypeLessThan,
+		InstancePatchStateOperatorTypeGreaterThan,
+	}
+}
+
 const (
 	// InventoryAttributeDataTypeString is a InventoryAttributeDataType enum value
 	InventoryAttributeDataTypeString = "string"
@@ -47736,6 +48332,14 @@ const (
 	InventoryAttributeDataTypeNumber = "number"
 )
 
+// InventoryAttributeDataType_Values returns all elements of the InventoryAttributeDataType enum
+func InventoryAttributeDataType_Values() []string {
+	return []string{
+		InventoryAttributeDataTypeString,
+		InventoryAttributeDataTypeNumber,
+	}
+}
+
 const (
 	// InventoryDeletionStatusInProgress is a InventoryDeletionStatus enum value
 	InventoryDeletionStatusInProgress = "InProgress"
@@ -47743,6 +48347,14 @@ const (
 	// InventoryDeletionStatusComplete is a InventoryDeletionStatus enum value
 	InventoryDeletionStatusComplete = "Complete"
 )
+
+// InventoryDeletionStatus_Values returns all elements of the InventoryDeletionStatus enum
+func InventoryDeletionStatus_Values() []string {
+	return []string{
+		InventoryDeletionStatusInProgress,
+		InventoryDeletionStatusComplete,
+	}
+}
 
 const (
 	// InventoryQueryOperatorTypeEqual is a InventoryQueryOperatorType enum value
@@ -47764,6 +48376,18 @@ const (
 	InventoryQueryOperatorTypeExists = "Exists"
 )
 
+// InventoryQueryOperatorType_Values returns all elements of the InventoryQueryOperatorType enum
+func InventoryQueryOperatorType_Values() []string {
+	return []string{
+		InventoryQueryOperatorTypeEqual,
+		InventoryQueryOperatorTypeNotEqual,
+		InventoryQueryOperatorTypeBeginWith,
+		InventoryQueryOperatorTypeLessThan,
+		InventoryQueryOperatorTypeGreaterThan,
+		InventoryQueryOperatorTypeExists,
+	}
+}
+
 const (
 	// InventorySchemaDeleteOptionDisableSchema is a InventorySchemaDeleteOption enum value
 	InventorySchemaDeleteOptionDisableSchema = "DisableSchema"
@@ -47771,6 +48395,14 @@ const (
 	// InventorySchemaDeleteOptionDeleteSchema is a InventorySchemaDeleteOption enum value
 	InventorySchemaDeleteOptionDeleteSchema = "DeleteSchema"
 )
+
+// InventorySchemaDeleteOption_Values returns all elements of the InventorySchemaDeleteOption enum
+func InventorySchemaDeleteOption_Values() []string {
+	return []string{
+		InventorySchemaDeleteOptionDisableSchema,
+		InventorySchemaDeleteOptionDeleteSchema,
+	}
+}
 
 const (
 	// LastResourceDataSyncStatusSuccessful is a LastResourceDataSyncStatus enum value
@@ -47782,6 +48414,15 @@ const (
 	// LastResourceDataSyncStatusInProgress is a LastResourceDataSyncStatus enum value
 	LastResourceDataSyncStatusInProgress = "InProgress"
 )
+
+// LastResourceDataSyncStatus_Values returns all elements of the LastResourceDataSyncStatus enum
+func LastResourceDataSyncStatus_Values() []string {
+	return []string{
+		LastResourceDataSyncStatusSuccessful,
+		LastResourceDataSyncStatusFailed,
+		LastResourceDataSyncStatusInProgress,
+	}
+}
 
 const (
 	// MaintenanceWindowExecutionStatusPending is a MaintenanceWindowExecutionStatus enum value
@@ -47809,6 +48450,20 @@ const (
 	MaintenanceWindowExecutionStatusSkippedOverlapping = "SKIPPED_OVERLAPPING"
 )
 
+// MaintenanceWindowExecutionStatus_Values returns all elements of the MaintenanceWindowExecutionStatus enum
+func MaintenanceWindowExecutionStatus_Values() []string {
+	return []string{
+		MaintenanceWindowExecutionStatusPending,
+		MaintenanceWindowExecutionStatusInProgress,
+		MaintenanceWindowExecutionStatusSuccess,
+		MaintenanceWindowExecutionStatusFailed,
+		MaintenanceWindowExecutionStatusTimedOut,
+		MaintenanceWindowExecutionStatusCancelling,
+		MaintenanceWindowExecutionStatusCancelled,
+		MaintenanceWindowExecutionStatusSkippedOverlapping,
+	}
+}
+
 const (
 	// MaintenanceWindowResourceTypeInstance is a MaintenanceWindowResourceType enum value
 	MaintenanceWindowResourceTypeInstance = "INSTANCE"
@@ -47816,6 +48471,14 @@ const (
 	// MaintenanceWindowResourceTypeResourceGroup is a MaintenanceWindowResourceType enum value
 	MaintenanceWindowResourceTypeResourceGroup = "RESOURCE_GROUP"
 )
+
+// MaintenanceWindowResourceType_Values returns all elements of the MaintenanceWindowResourceType enum
+func MaintenanceWindowResourceType_Values() []string {
+	return []string{
+		MaintenanceWindowResourceTypeInstance,
+		MaintenanceWindowResourceTypeResourceGroup,
+	}
+}
 
 const (
 	// MaintenanceWindowTaskTypeRunCommand is a MaintenanceWindowTaskType enum value
@@ -47830,6 +48493,16 @@ const (
 	// MaintenanceWindowTaskTypeLambda is a MaintenanceWindowTaskType enum value
 	MaintenanceWindowTaskTypeLambda = "LAMBDA"
 )
+
+// MaintenanceWindowTaskType_Values returns all elements of the MaintenanceWindowTaskType enum
+func MaintenanceWindowTaskType_Values() []string {
+	return []string{
+		MaintenanceWindowTaskTypeRunCommand,
+		MaintenanceWindowTaskTypeAutomation,
+		MaintenanceWindowTaskTypeStepFunctions,
+		MaintenanceWindowTaskTypeLambda,
+	}
+}
 
 const (
 	// NotificationEventAll is a NotificationEvent enum value
@@ -47851,6 +48524,18 @@ const (
 	NotificationEventFailed = "Failed"
 )
 
+// NotificationEvent_Values returns all elements of the NotificationEvent enum
+func NotificationEvent_Values() []string {
+	return []string{
+		NotificationEventAll,
+		NotificationEventInProgress,
+		NotificationEventSuccess,
+		NotificationEventTimedOut,
+		NotificationEventCancelled,
+		NotificationEventFailed,
+	}
+}
+
 const (
 	// NotificationTypeCommand is a NotificationType enum value
 	NotificationTypeCommand = "Command"
@@ -47858,6 +48543,14 @@ const (
 	// NotificationTypeInvocation is a NotificationType enum value
 	NotificationTypeInvocation = "Invocation"
 )
+
+// NotificationType_Values returns all elements of the NotificationType enum
+func NotificationType_Values() []string {
+	return []string{
+		NotificationTypeCommand,
+		NotificationTypeInvocation,
+	}
+}
 
 const (
 	// OperatingSystemWindows is a OperatingSystem enum value
@@ -47888,6 +48581,21 @@ const (
 	OperatingSystemDebian = "DEBIAN"
 )
 
+// OperatingSystem_Values returns all elements of the OperatingSystem enum
+func OperatingSystem_Values() []string {
+	return []string{
+		OperatingSystemWindows,
+		OperatingSystemAmazonLinux,
+		OperatingSystemAmazonLinux2,
+		OperatingSystemUbuntu,
+		OperatingSystemRedhatEnterpriseLinux,
+		OperatingSystemSuse,
+		OperatingSystemCentos,
+		OperatingSystemOracleLinux,
+		OperatingSystemDebian,
+	}
+}
+
 const (
 	// OpsFilterOperatorTypeEqual is a OpsFilterOperatorType enum value
 	OpsFilterOperatorTypeEqual = "Equal"
@@ -47908,6 +48616,18 @@ const (
 	OpsFilterOperatorTypeExists = "Exists"
 )
 
+// OpsFilterOperatorType_Values returns all elements of the OpsFilterOperatorType enum
+func OpsFilterOperatorType_Values() []string {
+	return []string{
+		OpsFilterOperatorTypeEqual,
+		OpsFilterOperatorTypeNotEqual,
+		OpsFilterOperatorTypeBeginWith,
+		OpsFilterOperatorTypeLessThan,
+		OpsFilterOperatorTypeGreaterThan,
+		OpsFilterOperatorTypeExists,
+	}
+}
+
 const (
 	// OpsItemDataTypeSearchableString is a OpsItemDataType enum value
 	OpsItemDataTypeSearchableString = "SearchableString"
@@ -47915,6 +48635,14 @@ const (
 	// OpsItemDataTypeString is a OpsItemDataType enum value
 	OpsItemDataTypeString = "String"
 )
+
+// OpsItemDataType_Values returns all elements of the OpsItemDataType enum
+func OpsItemDataType_Values() []string {
+	return []string{
+		OpsItemDataTypeSearchableString,
+		OpsItemDataTypeString,
+	}
+}
 
 const (
 	// OpsItemFilterKeyStatus is a OpsItemFilterKey enum value
@@ -47963,6 +48691,27 @@ const (
 	OpsItemFilterKeySeverity = "Severity"
 )
 
+// OpsItemFilterKey_Values returns all elements of the OpsItemFilterKey enum
+func OpsItemFilterKey_Values() []string {
+	return []string{
+		OpsItemFilterKeyStatus,
+		OpsItemFilterKeyCreatedBy,
+		OpsItemFilterKeySource,
+		OpsItemFilterKeyPriority,
+		OpsItemFilterKeyTitle,
+		OpsItemFilterKeyOpsItemId,
+		OpsItemFilterKeyCreatedTime,
+		OpsItemFilterKeyLastModifiedTime,
+		OpsItemFilterKeyOperationalData,
+		OpsItemFilterKeyOperationalDataKey,
+		OpsItemFilterKeyOperationalDataValue,
+		OpsItemFilterKeyResourceId,
+		OpsItemFilterKeyAutomationId,
+		OpsItemFilterKeyCategory,
+		OpsItemFilterKeySeverity,
+	}
+}
+
 const (
 	// OpsItemFilterOperatorEqual is a OpsItemFilterOperator enum value
 	OpsItemFilterOperatorEqual = "Equal"
@@ -47977,6 +48726,16 @@ const (
 	OpsItemFilterOperatorLessThan = "LessThan"
 )
 
+// OpsItemFilterOperator_Values returns all elements of the OpsItemFilterOperator enum
+func OpsItemFilterOperator_Values() []string {
+	return []string{
+		OpsItemFilterOperatorEqual,
+		OpsItemFilterOperatorContains,
+		OpsItemFilterOperatorGreaterThan,
+		OpsItemFilterOperatorLessThan,
+	}
+}
+
 const (
 	// OpsItemStatusOpen is a OpsItemStatus enum value
 	OpsItemStatusOpen = "Open"
@@ -47987,6 +48746,15 @@ const (
 	// OpsItemStatusResolved is a OpsItemStatus enum value
 	OpsItemStatusResolved = "Resolved"
 )
+
+// OpsItemStatus_Values returns all elements of the OpsItemStatus enum
+func OpsItemStatus_Values() []string {
+	return []string{
+		OpsItemStatusOpen,
+		OpsItemStatusInProgress,
+		OpsItemStatusResolved,
+	}
+}
 
 const (
 	// ParameterTierStandard is a ParameterTier enum value
@@ -47999,6 +48767,15 @@ const (
 	ParameterTierIntelligentTiering = "Intelligent-Tiering"
 )
 
+// ParameterTier_Values returns all elements of the ParameterTier enum
+func ParameterTier_Values() []string {
+	return []string{
+		ParameterTierStandard,
+		ParameterTierAdvanced,
+		ParameterTierIntelligentTiering,
+	}
+}
+
 const (
 	// ParameterTypeString is a ParameterType enum value
 	ParameterTypeString = "String"
@@ -48009,6 +48786,15 @@ const (
 	// ParameterTypeSecureString is a ParameterType enum value
 	ParameterTypeSecureString = "SecureString"
 )
+
+// ParameterType_Values returns all elements of the ParameterType enum
+func ParameterType_Values() []string {
+	return []string{
+		ParameterTypeString,
+		ParameterTypeStringList,
+		ParameterTypeSecureString,
+	}
+}
 
 const (
 	// ParametersFilterKeyName is a ParametersFilterKey enum value
@@ -48021,6 +48807,15 @@ const (
 	ParametersFilterKeyKeyId = "KeyId"
 )
 
+// ParametersFilterKey_Values returns all elements of the ParametersFilterKey enum
+func ParametersFilterKey_Values() []string {
+	return []string{
+		ParametersFilterKeyName,
+		ParametersFilterKeyType,
+		ParametersFilterKeyKeyId,
+	}
+}
+
 const (
 	// PatchActionAllowAsDependency is a PatchAction enum value
 	PatchActionAllowAsDependency = "ALLOW_AS_DEPENDENCY"
@@ -48028,6 +48823,14 @@ const (
 	// PatchActionBlock is a PatchAction enum value
 	PatchActionBlock = "BLOCK"
 )
+
+// PatchAction_Values returns all elements of the PatchAction enum
+func PatchAction_Values() []string {
+	return []string{
+		PatchActionAllowAsDependency,
+		PatchActionBlock,
+	}
+}
 
 const (
 	// PatchComplianceDataStateInstalled is a PatchComplianceDataState enum value
@@ -48052,6 +48855,19 @@ const (
 	PatchComplianceDataStateFailed = "FAILED"
 )
 
+// PatchComplianceDataState_Values returns all elements of the PatchComplianceDataState enum
+func PatchComplianceDataState_Values() []string {
+	return []string{
+		PatchComplianceDataStateInstalled,
+		PatchComplianceDataStateInstalledOther,
+		PatchComplianceDataStateInstalledPendingReboot,
+		PatchComplianceDataStateInstalledRejected,
+		PatchComplianceDataStateMissing,
+		PatchComplianceDataStateNotApplicable,
+		PatchComplianceDataStateFailed,
+	}
+}
+
 const (
 	// PatchComplianceLevelCritical is a PatchComplianceLevel enum value
 	PatchComplianceLevelCritical = "CRITICAL"
@@ -48072,6 +48888,18 @@ const (
 	PatchComplianceLevelUnspecified = "UNSPECIFIED"
 )
 
+// PatchComplianceLevel_Values returns all elements of the PatchComplianceLevel enum
+func PatchComplianceLevel_Values() []string {
+	return []string{
+		PatchComplianceLevelCritical,
+		PatchComplianceLevelHigh,
+		PatchComplianceLevelMedium,
+		PatchComplianceLevelLow,
+		PatchComplianceLevelInformational,
+		PatchComplianceLevelUnspecified,
+	}
+}
+
 const (
 	// PatchDeploymentStatusApproved is a PatchDeploymentStatus enum value
 	PatchDeploymentStatusApproved = "APPROVED"
@@ -48086,7 +48914,26 @@ const (
 	PatchDeploymentStatusExplicitRejected = "EXPLICIT_REJECTED"
 )
 
+// PatchDeploymentStatus_Values returns all elements of the PatchDeploymentStatus enum
+func PatchDeploymentStatus_Values() []string {
+	return []string{
+		PatchDeploymentStatusApproved,
+		PatchDeploymentStatusPendingApproval,
+		PatchDeploymentStatusExplicitApproved,
+		PatchDeploymentStatusExplicitRejected,
+	}
+}
+
 const (
+	// PatchFilterKeyArch is a PatchFilterKey enum value
+	PatchFilterKeyArch = "ARCH"
+
+	// PatchFilterKeyAdvisoryId is a PatchFilterKey enum value
+	PatchFilterKeyAdvisoryId = "ADVISORY_ID"
+
+	// PatchFilterKeyBugzillaId is a PatchFilterKey enum value
+	PatchFilterKeyBugzillaId = "BUGZILLA_ID"
+
 	// PatchFilterKeyPatchSet is a PatchFilterKey enum value
 	PatchFilterKeyPatchSet = "PATCH_SET"
 
@@ -48099,8 +48946,17 @@ const (
 	// PatchFilterKeyClassification is a PatchFilterKey enum value
 	PatchFilterKeyClassification = "CLASSIFICATION"
 
+	// PatchFilterKeyCveId is a PatchFilterKey enum value
+	PatchFilterKeyCveId = "CVE_ID"
+
+	// PatchFilterKeyEpoch is a PatchFilterKey enum value
+	PatchFilterKeyEpoch = "EPOCH"
+
 	// PatchFilterKeyMsrcSeverity is a PatchFilterKey enum value
 	PatchFilterKeyMsrcSeverity = "MSRC_SEVERITY"
+
+	// PatchFilterKeyName is a PatchFilterKey enum value
+	PatchFilterKeyName = "NAME"
 
 	// PatchFilterKeyPatchId is a PatchFilterKey enum value
 	PatchFilterKeyPatchId = "PATCH_ID"
@@ -48111,9 +48967,46 @@ const (
 	// PatchFilterKeyPriority is a PatchFilterKey enum value
 	PatchFilterKeyPriority = "PRIORITY"
 
+	// PatchFilterKeyRepository is a PatchFilterKey enum value
+	PatchFilterKeyRepository = "REPOSITORY"
+
+	// PatchFilterKeyRelease is a PatchFilterKey enum value
+	PatchFilterKeyRelease = "RELEASE"
+
 	// PatchFilterKeySeverity is a PatchFilterKey enum value
 	PatchFilterKeySeverity = "SEVERITY"
+
+	// PatchFilterKeySecurity is a PatchFilterKey enum value
+	PatchFilterKeySecurity = "SECURITY"
+
+	// PatchFilterKeyVersion is a PatchFilterKey enum value
+	PatchFilterKeyVersion = "VERSION"
 )
+
+// PatchFilterKey_Values returns all elements of the PatchFilterKey enum
+func PatchFilterKey_Values() []string {
+	return []string{
+		PatchFilterKeyArch,
+		PatchFilterKeyAdvisoryId,
+		PatchFilterKeyBugzillaId,
+		PatchFilterKeyPatchSet,
+		PatchFilterKeyProduct,
+		PatchFilterKeyProductFamily,
+		PatchFilterKeyClassification,
+		PatchFilterKeyCveId,
+		PatchFilterKeyEpoch,
+		PatchFilterKeyMsrcSeverity,
+		PatchFilterKeyName,
+		PatchFilterKeyPatchId,
+		PatchFilterKeySection,
+		PatchFilterKeyPriority,
+		PatchFilterKeyRepository,
+		PatchFilterKeyRelease,
+		PatchFilterKeySeverity,
+		PatchFilterKeySecurity,
+		PatchFilterKeyVersion,
+	}
+}
 
 const (
 	// PatchOperationTypeScan is a PatchOperationType enum value
@@ -48122,6 +49015,14 @@ const (
 	// PatchOperationTypeInstall is a PatchOperationType enum value
 	PatchOperationTypeInstall = "Install"
 )
+
+// PatchOperationType_Values returns all elements of the PatchOperationType enum
+func PatchOperationType_Values() []string {
+	return []string{
+		PatchOperationTypeScan,
+		PatchOperationTypeInstall,
+	}
+}
 
 const (
 	// PatchPropertyProduct is a PatchProperty enum value
@@ -48143,6 +49044,18 @@ const (
 	PatchPropertySeverity = "SEVERITY"
 )
 
+// PatchProperty_Values returns all elements of the PatchProperty enum
+func PatchProperty_Values() []string {
+	return []string{
+		PatchPropertyProduct,
+		PatchPropertyProductFamily,
+		PatchPropertyClassification,
+		PatchPropertyMsrcSeverity,
+		PatchPropertyPriority,
+		PatchPropertySeverity,
+	}
+}
+
 const (
 	// PatchSetOs is a PatchSet enum value
 	PatchSetOs = "OS"
@@ -48150,6 +49063,14 @@ const (
 	// PatchSetApplication is a PatchSet enum value
 	PatchSetApplication = "APPLICATION"
 )
+
+// PatchSet_Values returns all elements of the PatchSet enum
+func PatchSet_Values() []string {
+	return []string{
+		PatchSetOs,
+		PatchSetApplication,
+	}
+}
 
 const (
 	// PingStatusOnline is a PingStatus enum value
@@ -48162,6 +49083,15 @@ const (
 	PingStatusInactive = "Inactive"
 )
 
+// PingStatus_Values returns all elements of the PingStatus enum
+func PingStatus_Values() []string {
+	return []string{
+		PingStatusOnline,
+		PingStatusConnectionLost,
+		PingStatusInactive,
+	}
+}
+
 const (
 	// PlatformTypeWindows is a PlatformType enum value
 	PlatformTypeWindows = "Windows"
@@ -48169,6 +49099,14 @@ const (
 	// PlatformTypeLinux is a PlatformType enum value
 	PlatformTypeLinux = "Linux"
 )
+
+// PlatformType_Values returns all elements of the PlatformType enum
+func PlatformType_Values() []string {
+	return []string{
+		PlatformTypeWindows,
+		PlatformTypeLinux,
+	}
+}
 
 const (
 	// RebootOptionRebootIfNeeded is a RebootOption enum value
@@ -48178,10 +49116,25 @@ const (
 	RebootOptionNoReboot = "NoReboot"
 )
 
+// RebootOption_Values returns all elements of the RebootOption enum
+func RebootOption_Values() []string {
+	return []string{
+		RebootOptionRebootIfNeeded,
+		RebootOptionNoReboot,
+	}
+}
+
 const (
 	// ResourceDataSyncS3FormatJsonSerDe is a ResourceDataSyncS3Format enum value
 	ResourceDataSyncS3FormatJsonSerDe = "JsonSerDe"
 )
+
+// ResourceDataSyncS3Format_Values returns all elements of the ResourceDataSyncS3Format enum
+func ResourceDataSyncS3Format_Values() []string {
+	return []string{
+		ResourceDataSyncS3FormatJsonSerDe,
+	}
+}
 
 const (
 	// ResourceTypeManagedInstance is a ResourceType enum value
@@ -48193,6 +49146,15 @@ const (
 	// ResourceTypeEc2instance is a ResourceType enum value
 	ResourceTypeEc2instance = "EC2Instance"
 )
+
+// ResourceType_Values returns all elements of the ResourceType enum
+func ResourceType_Values() []string {
+	return []string{
+		ResourceTypeManagedInstance,
+		ResourceTypeDocument,
+		ResourceTypeEc2instance,
+	}
+}
 
 const (
 	// ResourceTypeForTaggingDocument is a ResourceTypeForTagging enum value
@@ -48214,6 +49176,18 @@ const (
 	ResourceTypeForTaggingOpsItem = "OpsItem"
 )
 
+// ResourceTypeForTagging_Values returns all elements of the ResourceTypeForTagging enum
+func ResourceTypeForTagging_Values() []string {
+	return []string{
+		ResourceTypeForTaggingDocument,
+		ResourceTypeForTaggingManagedInstance,
+		ResourceTypeForTaggingMaintenanceWindow,
+		ResourceTypeForTaggingParameter,
+		ResourceTypeForTaggingPatchBaseline,
+		ResourceTypeForTaggingOpsItem,
+	}
+}
+
 const (
 	// SessionFilterKeyInvokedAfter is a SessionFilterKey enum value
 	SessionFilterKeyInvokedAfter = "InvokedAfter"
@@ -48229,7 +49203,22 @@ const (
 
 	// SessionFilterKeyStatus is a SessionFilterKey enum value
 	SessionFilterKeyStatus = "Status"
+
+	// SessionFilterKeySessionId is a SessionFilterKey enum value
+	SessionFilterKeySessionId = "SessionId"
 )
+
+// SessionFilterKey_Values returns all elements of the SessionFilterKey enum
+func SessionFilterKey_Values() []string {
+	return []string{
+		SessionFilterKeyInvokedAfter,
+		SessionFilterKeyInvokedBefore,
+		SessionFilterKeyTarget,
+		SessionFilterKeyOwner,
+		SessionFilterKeyStatus,
+		SessionFilterKeySessionId,
+	}
+}
 
 const (
 	// SessionStateActive is a SessionState enum value
@@ -48238,6 +49227,14 @@ const (
 	// SessionStateHistory is a SessionState enum value
 	SessionStateHistory = "History"
 )
+
+// SessionState_Values returns all elements of the SessionState enum
+func SessionState_Values() []string {
+	return []string{
+		SessionStateActive,
+		SessionStateHistory,
+	}
+}
 
 const (
 	// SessionStatusConnected is a SessionStatus enum value
@@ -48259,6 +49256,18 @@ const (
 	SessionStatusFailed = "Failed"
 )
 
+// SessionStatus_Values returns all elements of the SessionStatus enum
+func SessionStatus_Values() []string {
+	return []string{
+		SessionStatusConnected,
+		SessionStatusConnecting,
+		SessionStatusDisconnected,
+		SessionStatusTerminated,
+		SessionStatusTerminating,
+		SessionStatusFailed,
+	}
+}
+
 const (
 	// SignalTypeApprove is a SignalType enum value
 	SignalTypeApprove = "Approve"
@@ -48275,6 +49284,17 @@ const (
 	// SignalTypeResume is a SignalType enum value
 	SignalTypeResume = "Resume"
 )
+
+// SignalType_Values returns all elements of the SignalType enum
+func SignalType_Values() []string {
+	return []string{
+		SignalTypeApprove,
+		SignalTypeReject,
+		SignalTypeStartStep,
+		SignalTypeStopStep,
+		SignalTypeResume,
+	}
+}
 
 const (
 	// StepExecutionFilterKeyStartTimeBefore is a StepExecutionFilterKey enum value
@@ -48296,6 +49316,18 @@ const (
 	StepExecutionFilterKeyAction = "Action"
 )
 
+// StepExecutionFilterKey_Values returns all elements of the StepExecutionFilterKey enum
+func StepExecutionFilterKey_Values() []string {
+	return []string{
+		StepExecutionFilterKeyStartTimeBefore,
+		StepExecutionFilterKeyStartTimeAfter,
+		StepExecutionFilterKeyStepExecutionStatus,
+		StepExecutionFilterKeyStepExecutionId,
+		StepExecutionFilterKeyStepName,
+		StepExecutionFilterKeyAction,
+	}
+}
+
 const (
 	// StopTypeComplete is a StopType enum value
 	StopTypeComplete = "Complete"
@@ -48303,3 +49335,11 @@ const (
 	// StopTypeCancel is a StopType enum value
 	StopTypeCancel = "Cancel"
 )
+
+// StopType_Values returns all elements of the StopType enum
+func StopType_Values() []string {
+	return []string{
+		StopTypeComplete,
+		StopTypeCancel,
+	}
+}

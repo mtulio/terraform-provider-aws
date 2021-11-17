@@ -260,6 +260,13 @@ const (
 	// 473e64fd-f30b-4765-81a0-62ad96dd167a.
 	ErrCodeInvalidWebACLId = "InvalidWebACLId"
 
+	// ErrCodeKeyGroupAlreadyExists for service response error code
+	// "KeyGroupAlreadyExists".
+	//
+	// A key group with this name already exists. You must provide a unique name.
+	// To modify an existing key group, use UpdateKeyGroup.
+	ErrCodeKeyGroupAlreadyExists = "KeyGroupAlreadyExists"
+
 	// ErrCodeMissingBody for service response error code
 	// "MissingBody".
 	//
@@ -320,6 +327,12 @@ const (
 	//
 	// The specified public key doesn't exist.
 	ErrCodeNoSuchPublicKey = "NoSuchPublicKey"
+
+	// ErrCodeNoSuchRealtimeLogConfig for service response error code
+	// "NoSuchRealtimeLogConfig".
+	//
+	// The real-time log configuration does not exist.
+	ErrCodeNoSuchRealtimeLogConfig = "NoSuchRealtimeLogConfig"
 
 	// ErrCodeNoSuchResource for service response error code
 	// "NoSuchResource".
@@ -386,6 +399,26 @@ const (
 	//
 	// No profile specified for the field-level encryption query argument.
 	ErrCodeQueryArgProfileEmpty = "QueryArgProfileEmpty"
+
+	// ErrCodeRealtimeLogConfigAlreadyExists for service response error code
+	// "RealtimeLogConfigAlreadyExists".
+	//
+	// A real-time log configuration with this name already exists. You must provide
+	// a unique name. To modify an existing real-time log configuration, use UpdateRealtimeLogConfig.
+	ErrCodeRealtimeLogConfigAlreadyExists = "RealtimeLogConfigAlreadyExists"
+
+	// ErrCodeRealtimeLogConfigInUse for service response error code
+	// "RealtimeLogConfigInUse".
+	//
+	// Cannot delete the real-time log configuration because it is attached to one
+	// or more cache behaviors.
+	ErrCodeRealtimeLogConfigInUse = "RealtimeLogConfigInUse"
+
+	// ErrCodeResourceInUse for service response error code
+	// "ResourceInUse".
+	//
+	// Cannot delete this resource because it is in use.
+	ErrCodeResourceInUse = "ResourceInUse"
 
 	// ErrCodeStreamingDistributionAlreadyExists for service response error code
 	// "StreamingDistributionAlreadyExists".
@@ -479,6 +512,14 @@ const (
 	// configuration for field-level encryption.
 	ErrCodeTooManyDistributionsAssociatedToFieldLevelEncryptionConfig = "TooManyDistributionsAssociatedToFieldLevelEncryptionConfig"
 
+	// ErrCodeTooManyDistributionsAssociatedToKeyGroup for service response error code
+	// "TooManyDistributionsAssociatedToKeyGroup".
+	//
+	// The number of distributions that reference this key group is more than the
+	// maximum allowed. For more information, see Quotas (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html)
+	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
+	ErrCodeTooManyDistributionsAssociatedToKeyGroup = "TooManyDistributionsAssociatedToKeyGroup"
+
 	// ErrCodeTooManyDistributionsAssociatedToOriginRequestPolicy for service response error code
 	// "TooManyDistributionsAssociatedToOriginRequestPolicy".
 	//
@@ -571,6 +612,22 @@ const (
 	// batch requests, or invalidation objects.
 	ErrCodeTooManyInvalidationsInProgress = "TooManyInvalidationsInProgress"
 
+	// ErrCodeTooManyKeyGroups for service response error code
+	// "TooManyKeyGroups".
+	//
+	// You have reached the maximum number of key groups for this AWS account. For
+	// more information, see Quotas (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html)
+	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
+	ErrCodeTooManyKeyGroups = "TooManyKeyGroups"
+
+	// ErrCodeTooManyKeyGroupsAssociatedToDistribution for service response error code
+	// "TooManyKeyGroupsAssociatedToDistribution".
+	//
+	// The number of key groups referenced by this distribution is more than the
+	// maximum allowed. For more information, see Quotas (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html)
+	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
+	ErrCodeTooManyKeyGroupsAssociatedToDistribution = "TooManyKeyGroupsAssociatedToDistribution"
+
 	// ErrCodeTooManyLambdaFunctionAssociations for service response error code
 	// "TooManyLambdaFunctionAssociations".
 	//
@@ -612,6 +669,14 @@ const (
 	// To create a new public key, delete one of the existing keys.
 	ErrCodeTooManyPublicKeys = "TooManyPublicKeys"
 
+	// ErrCodeTooManyPublicKeysInKeyGroup for service response error code
+	// "TooManyPublicKeysInKeyGroup".
+	//
+	// The number of public keys in this key group is more than the maximum allowed.
+	// For more information, see Quotas (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html)
+	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
+	ErrCodeTooManyPublicKeysInKeyGroup = "TooManyPublicKeysInKeyGroup"
+
 	// ErrCodeTooManyQueryStringParameters for service response error code
 	// "TooManyQueryStringParameters".
 	//
@@ -634,6 +699,14 @@ const (
 	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
 	ErrCodeTooManyQueryStringsInOriginRequestPolicy = "TooManyQueryStringsInOriginRequestPolicy"
 
+	// ErrCodeTooManyRealtimeLogConfigs for service response error code
+	// "TooManyRealtimeLogConfigs".
+	//
+	// You have reached the maximum number of real-time log configurations for this
+	// AWS account. For more information, see Quotas (https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html)
+	// (formerly known as limits) in the Amazon CloudFront Developer Guide.
+	ErrCodeTooManyRealtimeLogConfigs = "TooManyRealtimeLogConfigs"
+
 	// ErrCodeTooManyStreamingDistributionCNAMEs for service response error code
 	// "TooManyStreamingDistributionCNAMEs".
 	//
@@ -652,6 +725,12 @@ const (
 	//
 	// Your request contains more trusted signers than are allowed per distribution.
 	ErrCodeTooManyTrustedSigners = "TooManyTrustedSigners"
+
+	// ErrCodeTrustedKeyGroupDoesNotExist for service response error code
+	// "TrustedKeyGroupDoesNotExist".
+	//
+	// The specified key group does not exist.
+	ErrCodeTrustedKeyGroupDoesNotExist = "TrustedKeyGroupDoesNotExist"
 
 	// ErrCodeTrustedSignerDoesNotExist for service response error code
 	// "TrustedSignerDoesNotExist".
