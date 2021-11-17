@@ -125,16 +125,18 @@ func resourceAwsEbsVolumeCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if iops := d.Get("iops").(int); iops > 0 {
-		if t != ec2.VolumeTypeIo1 {
+		switch t {
+		case ec2.VolumeTypeIo1, ec2.VolumeTypeGp3:
+			// We add the iops value without validating it's size, to allow AWS to
+			// enforce a size requirement (currently 100)
+			request.Iops = aws.Int64(int64(iops))
+		default:
 			if t == "" {
 				// Volume creation would default to gp2
 				t = ec2.VolumeTypeGp2
 			}
 			return fmt.Errorf("error creating ebs_volume: iops attribute not supported for type %s", t)
 		}
-		// We add the iops value without validating it's size, to allow AWS to
-		// enforce a size requirement (currently 100)
-		request.Iops = aws.Int64(int64(iops))
 	}
 
 	log.Printf("[DEBUG] EBS Volume create opts: %s", request)
