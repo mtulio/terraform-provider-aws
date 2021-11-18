@@ -400,6 +400,7 @@ func resourceAwsInstance() *schema.Resource {
 								ec2.VolumeTypeStandard,
 								ec2.VolumeTypeIo1,
 								ec2.VolumeTypeGp2,
+								ec2.VolumeTypeGp3,
 								ec2.VolumeTypeSc1,
 								ec2.VolumeTypeSt1,
 							}, false),
@@ -511,6 +512,7 @@ func resourceAwsInstance() *schema.Resource {
 								ec2.VolumeTypeStandard,
 								ec2.VolumeTypeIo1,
 								ec2.VolumeTypeGp2,
+								ec2.VolumeTypeGp3,
 								ec2.VolumeTypeSc1,
 								ec2.VolumeTypeSt1,
 							}, false),
@@ -1835,7 +1837,7 @@ func readBlockDeviceMappingsFromConfig(d *schema.ResourceData, conn *ec2.EC2) ([
 				if iops, ok := bd["iops"].(int); ok && iops > 0 {
 					if ec2.VolumeTypeIo1 == strings.ToLower(v) {
 						// Condition: This parameter is required for requests to create io1
-						// volumes; it is not used in requests to create gp2, st1, sc1, or
+						// volumes; it is not used in requests to create gp2, gp3 (optional), st1, sc1, or
 						// standard volumes.
 						// See: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html
 						ebs.Iops = aws.Int64(int64(iops))
