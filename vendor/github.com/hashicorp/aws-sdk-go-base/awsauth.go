@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/hashicorp/aws-sdk-go-base/tfawserr"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-multierror"
 	homedir "github.com/mitchellh/go-homedir"
@@ -173,9 +174,10 @@ func GetCredentialsFromSession(c *Config) (*awsCredentials.Credentials, error) {
 	// client from automatically lowering the timeout to 1 second.
 	options := &session.Options{
 		Config: aws.Config{
-			EndpointResolver: c.EndpointResolver(),
-			MaxRetries:       aws.Int(0),
-			Region:           aws.String(c.Region),
+			CredentialsChainVerboseErrors: aws.Bool(true),
+			EndpointResolver:              c.EndpointResolver(),
+			MaxRetries:                    aws.Int(0),
+			Region:                        aws.String(c.Region),
 		},
 		Profile:           c.Profile,
 		SharedConfigState: session.SharedConfigEnable,
@@ -183,7 +185,7 @@ func GetCredentialsFromSession(c *Config) (*awsCredentials.Credentials, error) {
 
 	sess, err := session.NewSessionWithOptions(*options)
 	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
+		if tfawserr.ErrCodeEquals(err, "NoCredentialProviders") {
 			return nil, c.NewNoValidCredentialSourcesError(err)
 		}
 		return nil, fmt.Errorf("Error creating AWS session: %w", err)
@@ -200,10 +202,10 @@ func GetCredentialsFromSession(c *Config) (*awsCredentials.Credentials, error) {
 	return creds, nil
 }
 
-// GetCredentials gets credentials from the environment, shared credentials,
-// the session (which may include a credential process), or ECS/EC2 metadata endpoints.
-// GetCredentials also validates the credentials and the ability to assume a role
-// or will return an error if unsuccessful.
+// GetCredentials gets credentials from environment, shared credentials file,
+// environment AWS_SHARED_CREDENTIALS_FILE, the session (which may include a credential process),
+// or ECS/EC2 metadata endpoints. GetCredentials also validates the credentials
+// and the ability to assume a role or will return an error if unsuccessful.
 func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 	sharedCredentialsFilename, err := homedir.Expand(c.CredsFilename)
 
@@ -229,7 +231,7 @@ func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 	creds := awsCredentials.NewChainCredentials(providers)
 	cp, err := creds.Get()
 	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
+		if tfawserr.ErrCodeEquals(err, "NoCredentialProviders") {
 			creds, err = GetCredentialsFromSession(c)
 			if err != nil {
 				return nil, err
@@ -252,11 +254,17 @@ func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 		c.AssumeRoleARN, c.AssumeRoleSessionName, c.AssumeRoleExternalID)
 
 	awsConfig := &aws.Config{
-		Credentials:      creds,
-		EndpointResolver: c.EndpointResolver(),
-		Region:           aws.String(c.Region),
-		MaxRetries:       aws.Int(c.MaxRetries),
-		HTTPClient:       cleanhttp.DefaultClient(),
+		CredentialsChainVerboseErrors: aws.Bool(true),
+		Credentials:                   creds,
+		EndpointResolver:              c.EndpointResolver(),
+		Region:                        aws.String(c.Region),
+		MaxRetries:                    aws.Int(c.MaxRetries),
+		HTTPClient:                    cleanhttp.DefaultClient(),
+	}
+
+	if c.DebugLogging {
+		awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
+		awsConfig.Logger = DebugLogger{}
 	}
 
 	assumeRoleSession, err := session.NewSession(awsConfig)

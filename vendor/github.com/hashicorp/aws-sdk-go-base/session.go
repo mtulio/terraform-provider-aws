@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,10 +14,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/hashicorp/aws-sdk-go-base/tfawserr"
 	"github.com/hashicorp/go-cleanhttp"
 )
 
 const (
+	// AppendUserAgentEnvVar is a conventionally used environment variable
+	// containing additional HTTP User-Agent information.
+	// If present and its value is non-empty, it is directly appended to the
+	// User-Agent header for HTTP requests.
+	AppendUserAgentEnvVar = "TF_APPEND_USER_AGENT"
 	// Maximum network retries.
 	// We depend on the AWS Go SDK DefaultRetryer exponential backoff.
 	// Ensure that if the AWS Config MaxRetries is set high (which it is by
@@ -31,10 +38,11 @@ const (
 func GetSessionOptions(c *Config) (*session.Options, error) {
 	options := &session.Options{
 		Config: aws.Config{
-			EndpointResolver: c.EndpointResolver(),
-			HTTPClient:       cleanhttp.DefaultClient(),
-			MaxRetries:       aws.Int(0),
-			Region:           aws.String(c.Region),
+			CredentialsChainVerboseErrors: aws.Bool(true),
+			EndpointResolver:              c.EndpointResolver(),
+			HTTPClient:                    cleanhttp.DefaultClient(),
+			MaxRetries:                    aws.Int(0),
+			Region:                        aws.String(c.Region),
 		},
 		Profile:           c.Profile,
 		SharedConfigState: session.SharedConfigEnable,
@@ -49,11 +57,20 @@ func GetSessionOptions(c *Config) (*session.Options, error) {
 	// add the validated credentials to the session options
 	options.Config.Credentials = creds
 
+	transport := options.Config.HTTPClient.Transport.(*http.Transport)
 	if c.Insecure {
-		transport := options.Config.HTTPClient.Transport.(*http.Transport)
 		transport.TLSClientConfig = &tls.Config{
 			InsecureSkipVerify: true,
 		}
+	}
+
+	if c.HTTPProxy != "" {
+		proxyUrl, err := url.Parse(c.HTTPProxy)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing HTTP proxy URL: %w", err)
+		}
+
+		transport.Proxy = http.ProxyURL(proxyUrl)
 	}
 
 	if c.DebugLogging {
@@ -78,7 +95,7 @@ func GetSession(c *Config) (*session.Session, error) {
 
 	sess, err := session.NewSessionWithOptions(*options)
 	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
+		if tfawserr.ErrCodeEquals(err, "NoCredentialProviders") {
 			return nil, c.NewNoValidCredentialSourcesError(err)
 		}
 		return nil, fmt.Errorf("Error creating AWS session: %w", err)
@@ -88,8 +105,24 @@ func GetSession(c *Config) (*session.Session, error) {
 		sess = sess.Copy(&aws.Config{MaxRetries: aws.Int(c.MaxRetries)})
 	}
 
-	for _, product := range c.UserAgentProducts {
-		sess.Handlers.Build.PushBack(request.MakeAddToUserAgentHandler(product.Name, product.Version, product.Extra...))
+	// AWS SDK Go automatically adds a User-Agent product to HTTP requests,
+	// which contains helpful information about the SDK version and runtime.
+	// The configuration of additional User-Agent header products should take
+	// precedence over that product. Since the AWS SDK Go request package
+	// functions only append, we must PushFront on the build handlers instead
+	// of PushBack. To properly keep the order given by the configuration, we
+	// must reverse iterate through the products so the last item is PushFront
+	// first through the first item being PushFront last.
+	for i := len(c.UserAgentProducts) - 1; i >= 0; i-- {
+		product := c.UserAgentProducts[i]
+		sess.Handlers.Build.PushFront(request.MakeAddToUserAgentHandler(product.Name, product.Version, product.Extra...))
+	}
+
+	// Add custom input from ENV to the User-Agent request header
+	// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/9149
+	if v := os.Getenv(AppendUserAgentEnvVar); v != "" {
+		log.Printf("[DEBUG] Using additional User-Agent Info: %s", v)
+		sess.Handlers.Build.PushBack(request.MakeAddToUserAgentFreeFormHandler(v))
 	}
 
 	// Generally, we want to configure a lower retry theshold for networking issues
@@ -104,13 +137,13 @@ func GetSession(c *Config) (*session.Session, error) {
 		}
 		// RequestError: send request failed
 		// caused by: Post https://FQDN/: dial tcp: lookup FQDN: no such host
-		if IsAWSErrExtended(r.Error, "RequestError", "send request failed", "no such host") {
+		if tfawserr.ErrMessageAndOrigErrContain(r.Error, request.ErrCodeRequestError, "send request failed", "no such host") {
 			log.Printf("[WARN] Disabling retries after next request due to networking issue")
 			r.Retryable = aws.Bool(false)
 		}
 		// RequestError: send request failed
 		// caused by: Post https://FQDN/: dial tcp IPADDRESS:443: connect: connection refused
-		if IsAWSErrExtended(r.Error, "RequestError", "send request failed", "connection refused") {
+		if tfawserr.ErrMessageAndOrigErrContain(r.Error, request.ErrCodeRequestError, "send request failed", "connection refused") {
 			log.Printf("[WARN] Disabling retries after next request due to networking issue")
 			r.Retryable = aws.Bool(false)
 		}
